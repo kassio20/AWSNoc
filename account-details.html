@@ -1,0 +1,276 @@
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelectNOC IA - Detalhes da Conta</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0d1117;
+            color: #e6edf3; 
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn {
+            background: #21262d;
+            color: #e6edf3;
+            border: 1px solid #30363d;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #30363d;
+            color: #58a6ff;
+        }
+
+        .account-header {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .account-title {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #58a6ff;
+        }
+
+        .section {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #e6edf3;
+            margin-bottom: 1.5rem;
+        }
+
+        .alerts-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .alert-card {
+            background: #21262d;
+            border-left: 4px solid #da3633;
+            border-radius: 8px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .alert-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(218, 54, 51, 0.2);
+        }
+
+        .alert-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .alert-description {
+            color: #7d8590;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .analyze-alert-btn {
+            background: linear-gradient(135deg, #238636, #2ea043);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        .analyze-alert-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(35, 134, 54, 0.3);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            border: 3px solid #30363d;
+            border-top: 3px solid #58a6ff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #7d8590;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/accounts.html" class="back-btn">← Voltar para Contas</a>
+        <h1>Detalhes da Conta AWS</h1>
+    </div>
+
+    <div id="account-info" class="account-header">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Carregando informações da conta...</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">🚨 Alertas Ativos</h2>
+        <div id="alerts-container">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Carregando alertas...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        let currentAccountId = null;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        currentAccountId = urlParams.get('id');
+
+            alert('ID da conta não fornecido');
+            window.location.href = '/accounts.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadAccountInfo();
+            await loadAlerts();
+        });
+
+        async function loadAccountInfo() {
+            try {
+                const response = await fetch(`/api/v1/accounts/${currentAccountId}`);
+                const account = await response.json();
+
+                if (response.ok) {
+                    displayAccountInfo(account);
+                } else {
+                    throw new Error(account.detail || 'Erro ao carregar conta');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar conta:', error);
+                document.getElementById('account-info').innerHTML = `
+                    <div style="text-align: center; color: #da3633;">
+                        Erro ao carregar informações da conta: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function displayAccountInfo(account) {
+            document.getElementById('account-info').innerHTML = `
+                <div class="account-title">${account.name}</div>
+                <div style="color: #7d8590; margin-bottom: 1rem;">Account ID: ${account.account_id} | Região: ${account.region}</div>
+            `;
+        }
+
+        async function loadAlerts() {
+            const container = document.getElementById('alerts-container');
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Carregando alertas...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`/api/v1/accounts/${currentAccountId}/alerts`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayAlerts(data.alerts || []);
+                } else {
+                    throw new Error(data.detail || 'Erro ao carregar alertas');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar alertas:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Erro ao carregar alertas</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayAlerts(alerts) {
+            const container = document.getElementById('alerts-container');
+            
+            if (alerts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>✅ Nenhum alerta ativo</h3>
+                        <p>Todos os recursos estão funcionando normalmente</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="alerts-grid">
+                    ${alerts.map(alert => `
+                        <div class="alert-card" onclick="analyzeAlert(${alert.id})">
+                            <div class="alert-title">${alert.title}</div>
+                            <div class="alert-description">${alert.description || 'Sem descrição disponível'}</div>
+                            <div style="font-family: 'Courier New', monospace; font-size: 0.8rem; color: #58a6ff;">
+                                Recurso: ${alert.resource_id} (${alert.resource_type})
+                            </div>
+                            <button class="analyze-alert-btn" onclick="event.stopPropagation(); analyzeAlert(${alert.id})">
+                                🔍 Analisar com IA
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        async function analyzeAlert(alertId) {
+            window.location.href = `/alert-analysis.html?id=${alertId}&account=${currentAccountId}`;
+        }
+    </script>
+</body>
+</html>

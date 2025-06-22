@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelectNOC IA - Development</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container { 
+            text-align: center; 
+            padding: 2rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 90%;
+        }
+        h1 { 
+            font-size: 3rem; 
+            margin-bottom: 1rem; 
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .subtitle { 
+            font-size: 1.3rem; 
+            margin-bottom: 2rem; 
+            opacity: 0.9; 
+            font-weight: 300;
+        }
+        .status { 
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+        }
+        .api-test { 
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .result { 
+            margin-top: 1.5rem; 
+            padding: 1.5rem; 
+            background: rgba(0,0,0,0.3); 
+            border-radius: 8px; 
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            border: 1px solid rgba(255,255,255,0.2);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .info-card {
+            background: rgba(255,255,255,0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .info-card strong {
+            color: #4CAF50;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: #4CAF50;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .warning { color: #ff9800; }
+        
+        /* Dashboard Styles */
+        #dashboard-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .last-update {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+        }
+        
+        .status-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-left: 5px solid #4CAF50;
+            transition: all 0.3s ease;
+        }
+        
+        .status-card.warning {
+            border-left-color: #ff9800;
+            background: rgba(255, 152, 0, 0.1);
+        }
+        
+        .status-card.error {
+            border-left-color: #f44336;
+            background: rgba(244, 67, 54, 0.1);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .analyze-btn {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .alerts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-card {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid #f44336;
+            border-radius: 8px;
+            padding: 1rem;
+            position: relative;
+        }
+        
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .alert-type {
+            background: #f44336;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .alert-severity {
+            font-size: 1.2rem;
+        }
+        
+        .resource-info {
+            margin: 0.5rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .analysis-content {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .analysis-item {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .analysis-resource {
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logs-section {
+            background: rgba(0,0,0,0.4);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .recommendations-section {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid #4CAF50;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        
+        .recommendation-item {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+        }
+        
+        .healthy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.5rem;
+        }
+        
+        .healthy-card {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid #4CAF50;
+            border-radius: 6px;
+            padding: 0.8rem;
+            text-align: center;
+        }
+        
+        .analysis-status {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .metric-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin: 0.2rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Dashboard de Monitoramento em Tempo Real -->
+        <div id="dashboard-header">
+            <h1>🚀 SelectNOC IA - Monitoramento</h1>
+            <div class="subtitle">Análise Inteligente de Infraestrutura AWS</div>
+            <div id="last-update" class="last-update">Última atualização: --</div>
+        </div>
+
+        <!-- Status Geral -->
+        <div id="overall-status" class="status-card">
+            <h3 id="status-title">📊 Verificando recursos...</h3>
+            <p id="status-description">Aguarde...</p>
+        </div>
+
+        <!-- Alertas de Falhas -->
+        <div id="alerts-section" style="display: none;">
+            <div class="section-header">
+                <h3>🚨 Falhas Detectadas</h3>
+                <button onclick="analyzeFailures()" class="analyze-btn">🔍 Analisar com IA</button>
+            </div>
+            <div id="alerts-grid" class="alerts-grid"></div>
+        </div>
+
+        <!-- Análise de Logs e IA -->
+        <div id="analysis-section" style="display: none;">
+            <div class="section-header">
+                <h3>🤖 Análise Inteligente</h3>
+                <span id="analysis-status" class="analysis-status">Processando...</span>
+            </div>
+            <div id="analysis-content" class="analysis-content"></div>
+        </div>
+
+        <!-- Recursos Saudáveis -->
+        <div id="healthy-section" style="display: none;">
+            <div class="section-header">
+                <h3>✅ Recursos Saudáveis</h3>
+                <span id="healthy-count">0 recursos</span>
+            </div>
+            <div id="healthy-grid" class="healthy-grid"></div>
+        </div>
+        <h1>🚀 SelectNOC IA</h1>
+        <div class="subtitle">Ambiente de Desenvolvimento - AWS Ohio</div>
+        
+        <div class="status">
+            <h3>✅ Sistema Online</h3>
+            <p>Infraestrutura AWS configurada e aplicação deployada com sucesso!</p>
+        </div>
+
+        <div class="api-test">
+            <h3>🧪 Testes da API</h3>
+            <button onclick="testHealth()">Test Health</button>
+            <button onclick="testBedrock()">Test Bedrock IA</button>
+            <button onclick="testAnalyze()">Test Log Analysis</button>
+            <div id="result" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="api-test">
+            <h3>📊 Informações do Sistema</h3>
+            <div class="info-grid">
+                <div class="info-card">
+                    <strong>Região</strong>
+                    Ohio (us-east-2)
+                </div>
+                <div class="info-card">
+                    <strong>Ambiente</strong>
+                    Development
+                </div>
+                <div class="info-card">
+                    <strong>IA Engine</strong>
+                    Amazon Bedrock + Claude-3
+                </div>
+                <div class="info-card">
+                    <strong>Database</strong>
+                    PostgreSQL (t4g.micro)
+                </div>
+                <div class="info-card">
+                    <strong>Compute</strong>
+                    EC2 t3.small
+                </div>
+                <div class="info-card">
+                    <strong>Storage</strong>
+                    S3 + EBS gp3
+                </div>
+            </div>
+        </div>
+
+        <div class="api-test">
+            <h3>🔗 Links Úteis</h3>
+            <p><strong>API Base:</strong> <span id="api-base"></span></p>
+            <p><strong>Frontend S3:</strong> <a href="http://selectnoc-dev-frontend-068f853414e712ee.s3-website.us-east-2.amazonaws.com" target="_blank" style="color: #4CAF50;">Static Website</a></p>
+            <p><strong>API Docs:</strong> <a href="/docs" target="_blank" style="color: #4CAF50;">Swagger UI</a></p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        document.getElementById('api-base').textContent = API_BASE;
+        
+async function checkFailures() {
+    try {
+        const response = await fetch(`${API_BASE}/api/v1/accounts/1/resources`);
+        const data = await response.json();
+
+        const failedResources = data.resources.filter(resource => resource.status.includes('unhealthy'));
+
+        if (failedResources.length > 0) {
+            displayAlerts(failedResources);
+            const logs = await fetchLogs(failedResources);
+            const analysis = await analyzeLogs(logs);
+            displayRecommendations(analysis);
+        } else {
+            hideSections();
+            showResult('✅ Todos os recursos estão saudáveis!', 'success');
+        }
+    } catch (error) {
+        showResult(`❌ Error: ${error.message}`, 'error');
+    }
+}
+
+function displayAlerts(failedResources) {
+    const alerts = document.getElementById('alerts');
+    const content = document.getElementById('alerts-content');
+    content.innerHTML = failedResources.map(resource => `<div class='warning'>Recurso: ${resource.name}, Status: ${resource.status}</div>`).join('');
+    alerts.style.display = 'block';
+}
+
+async function fetchLogs(failedResources) {
+    return Promise.all(failedResources.map(async resource => {
+        const response = await fetch(`${API_BASE}/api/v1/resources/${resource.resource_id}/logs`);
+        const data = await response.json();
+        return { resource: resource.name, logs: data.logs };
+    }));
+}
+
+async function analyzeLogs(logs) {
+    return Promise.all(logs.map(async logEntry => {
+        const response = await fetch(`${API_BASE}/api/v1/analyze`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: logEntry.logs.join('\n'),
+                service: logEntry.resource
+            })
+        });
+        return { resource: logEntry.resource, analysis: await response.json() };
+    }));
+}
+
+function displayRecommendations(analyses) {
+    const logsSection = document.getElementById('logs');
+    const logsContent = document.getElementById('logs-content');
+    const recSection = document.getElementById('recommendations');
+    const recContent = document.getElementById('recommendations-content');
+
+    logsContent.innerHTML = analyses.map(entry => `<div><strong>${entry.resource}</strong><pre>${entry.analysis.logs}</pre></div>`).join('');
+    recContent.innerHTML = analyses.map(entry => `<div><strong>${entry.resource}</strong><pre>${entry.analysis.recommendations}</pre></div>`).join('');
+
+    logsSection.style.display = 'block';
+    recSection.style.display = 'block';
+}
+
+function hideSections() {
+    document.getElementById('alerts').style.display = 'none';
+    document.getElementById('logs').style.display = 'none';
+    document.getElementById('recommendations').style.display = 'none';
+}
+
+async function testHealth() {
+            showResult('🔄 Testando health check...', 'loading');
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                showResult(`✅ Health Check Result:\n${JSON.stringify(data, null, 2)}`, 'success');
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testBedrock() {
+            showResult('🤖 Testando Amazon Bedrock IA...', 'loading');
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/test/bedrock`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    showResult(`✅ Bedrock Test Result:\n${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    showResult(`⚠️ Bedrock Test Result:\n${JSON.stringify(data, null, 2)}`, 'warning');
+                }
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAnalyze() {
+            showResult('🔍 Testando análise de logs...', 'loading');
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: 'ERROR: Database connection failed - Connection timeout after 30 seconds',
+                        service: 'user-authentication-api'
+                    })
+                });
+                const data = await response.json();
+                showResult(`📊 Log Analysis Result:\n${JSON.stringify(data, null, 2)}`, 'success');
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function showResult(text, type = '') {
+            const result = document.getElementById('result');
+            result.textContent = text;
+            result.style.display = 'block';
+            result.className = `result ${type}`;
+            
+            // Auto scroll to result
+            result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Test health automatically on load
+        window.onload = function() {
+            setTimeout(() => {
+                testHealth();
+}, 1000); checkFailures();
+        };
+    </script>
+</body>
+</html>
+

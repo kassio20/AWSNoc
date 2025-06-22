@@ -1,0 +1,257 @@
+import sqlite3
+import json
+import logging
+from datetime import datetime
+from typing import List, Dict, Optional
+
+logger = logging.getLogger(__name__)
+
+class DatabaseManager:
+    def __init__(self, db_path: str = "/opt/selectnoc/selectnoc.db"):
+        self.db_path = db_path
+        self.init_database()
+    
+    def init_database(self):
+        """Initialize the database with required tables"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        # Create accounts table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS accounts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                account_id TEXT NOT NULL,
+                region TEXT NOT NULL,
+                access_key TEXT NOT NULL,
+                secret_key TEXT NOT NULL,
+                services TEXT NOT NULL,
+                status TEXT DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        
+        # Create resources table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS resources (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                account_db_id INTEGER,
+                resource_type TEXT NOT NULL,
+                resource_id TEXT NOT NULL,
+                name TEXT,
+                status TEXT,
+                region TEXT,
+                availability_zone TEXT,
+                instance_type TEXT,
+                vpc_id TEXT,
+                subnet_id TEXT,
+                security_groups TEXT,
+                tags TEXT,
+                metrics TEXT,
+                created_at TIMESTAMP,
+                last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (account_db_id) REFERENCES accounts (id)
+            )
+        ''')
+        
+        # Create metrics table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS metrics (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                account_db_id INTEGER,
+                resource_key TEXT NOT NULL,
+                metrics_data TEXT NOT NULL,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (account_db_id) REFERENCES accounts (id)
+            )
+        ''')
+        
+        conn.commit()
+        conn.close()
+        logger.info("Database initialized successfully")
+    
+    def add_account(self, name: str, account_id: str, region: str, access_key: str, secret_key: str, services: List[str]) -> int:
+        """Add a new account to the database"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        services_json = json.dumps(services)
+        
+        cursor.execute('''
+            INSERT INTO accounts (name, account_id, region, access_key, secret_key, services)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (name, account_id, region, access_key, secret_key, services_json))
+        
+        account_db_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        logger.info(f"Account {name} added to database with ID {account_db_id}")
+        return account_db_id
+    
+    def get_accounts(self) -> List[Dict]:
+        """Get all accounts from the database"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT * FROM accounts WHERE status = "active"')
+        rows = cursor.fetchall()
+        
+        accounts = []
+        for row in rows:
+            account = {
+                'id': row[0],
+                'name': row[1],
+                'account_id': row[2],
+                'region': row[3],
+                'access_key': row[4],
+                'secret_key': row[5],
+                'services': json.loads(row[6]),
+                'status': row[7],
+                'created_at': row[8]
+            }
+            accounts.append(account)
+        
+        conn.close()
+        return accounts
+    
+    def get_account_by_id(self, account_db_id: int) -> Optional[Dict]:
+        """Get a specific account by ID"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT * FROM accounts WHERE id = ? AND status = "active"', (account_db_id,))
+        row = cursor.fetchone()
+        
+        if row:
+            account = {
+                'id': row[0],
+                'name': row[1],
+                'account_id': row[2],
+                'region': row[3],
+                'access_key': row[4],
+                'secret_key': row[5],
+                'services': json.loads(row[6]),
+                'status': row[7],
+                'created_at': row[8]
+            }
+            conn.close()
+            return account
+        
+        conn.close()
+        return None
+    
+    def delete_account(self, account_db_id: int):
+        """Soft delete an account (mark as inactive)"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('UPDATE accounts SET status = "deleted" WHERE id = ?', (account_db_id,))
+        cursor.execute('DELETE FROM resources WHERE account_db_id = ?', (account_db_id,))
+        cursor.execute('DELETE FROM metrics WHERE account_db_id = ?', (account_db_id,))
+        
+        conn.commit()
+        conn.close()
+        logger.info(f"Account {account_db_id} deleted from database")
+    
+    def save_resources(self, account_db_id: int, resources: List[Dict]):
+        """Save resources for an account"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        # Delete existing resources for this account
+        cursor.execute('DELETE FROM resources WHERE account_db_id = ?', (account_db_id,))
+        
+        # Insert new resources
+        for resource in resources:
+            cursor.execute('''
+                INSERT INTO resources (
+                    account_db_id, resource_type, resource_id, name, status, region,
+                    availability_zone, instance_type, vpc_id, subnet_id, security_groups,
+                    tags, metrics, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                account_db_id,
+                resource.get('resource_type'),
+                resource.get('resource_id'),
+                resource.get('name'),
+                resource.get('status'),
+                resource.get('region'),
+                resource.get('availability_zone'),
+                resource.get('instance_type'),
+                resource.get('vpc_id'),
+                resource.get('subnet_id'),
+                json.dumps(resource.get('security_groups', [])),
+                json.dumps(resource.get('tags', {})),
+                json.dumps(resource.get('metrics', {})),
+                resource.get('created_at')
+            ))
+        
+        conn.commit()
+        conn.close()
+        logger.info(f"Saved {len(resources)} resources for account {account_db_id}")
+    
+    def get_resources(self, account_db_id: int) -> List[Dict]:
+        """Get all resources for an account"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT * FROM resources WHERE account_db_id = ?', (account_db_id,))
+        rows = cursor.fetchall()
+        
+        resources = []
+        for row in rows:
+            resource = {
+                'resource_type': row[2],
+                'resource_id': row[3],
+                'name': row[4],
+                'status': row[5],
+                'region': row[6],
+                'availability_zone': row[7],
+                'instance_type': row[8],
+                'vpc_id': row[9],
+                'subnet_id': row[10],
+                'security_groups': json.loads(row[11]) if row[11] else [],
+                'tags': json.loads(row[12]) if row[12] else {},
+                'metrics': json.loads(row[13]) if row[13] else {},
+                'created_at': row[14]
+            }
+            resources.append(resource)
+        
+        conn.close()
+        return resources
+    
+    def save_metrics(self, account_db_id: int, resource_key: str, metrics: Dict):
+        """Save metrics for a resource"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        # Delete existing metrics for this resource
+        cursor.execute('DELETE FROM metrics WHERE account_db_id = ? AND resource_key = ?', 
+                      (account_db_id, resource_key))
+        
+        # Insert new metrics
+        cursor.execute('''
+            INSERT INTO metrics (account_db_id, resource_key, metrics_data)
+            VALUES (?, ?, ?)
+        ''', (account_db_id, resource_key, json.dumps(metrics)))
+        
+        conn.commit()
+        conn.close()
+    
+    def get_metrics(self, account_db_id: int) -> Dict:
+        """Get all metrics for an account"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT resource_key, metrics_data FROM metrics WHERE account_db_id = ?', 
+                      (account_db_id,))
+        rows = cursor.fetchall()
+        
+        metrics = {}
+        for row in rows:
+            metrics[row[0]] = json.loads(row[1])
+        
+        conn.close()
+        return metrics
+

@@ -1,0 +1,396 @@
+# SelectNOC IA - Ferramenta Interna para NOC
+# Sistema para sua empresa gerenciar contas AWS de múltiplos clientes
+
+# Visão Geral da Arquitetura
+overview:
+  purpose: "Ferramenta interna para NOC monitorar contas AWS de clientes"
+  users: "Equipe NOC da sua empresa"
+  deployment: "Sua conta AWS única"
+  client_accounts: "Múltiplas contas de clientes (read-only access)"
+
+# Estratégia de Acesso a Contas de Clientes
+client_access_strategy:
+  methods_supported:
+    cross_account_roles:
+      description: "Mais seguro - Cliente cria role para você assumir"
+      setup: "Cliente executa CloudFormation"
+      permissions: "Read-only"
+      cost_client: "$0"
+      security: "Máxima"
+      
+    iam_user_keys:
+      description: "Cliente cria usuário IAM com permissões read-only"
+      setup: "Cliente cria usuário e compartilha keys"
+      permissions: "Read-only customizáveis"
+      cost_client: "$0"
+      security: "Boa (keys rotacionáveis)"
+      
+    temporary_credentials:
+      description: "STS temporary credentials"
+      setup: "Via API ou console"
+      permissions: "Temporárias"
+      cost_client: "$0"
+      security: "Muito boa"
+
+# Frontend para Gerenciamento do NOC
+frontend:
+  technology: "React + TypeScript + Next.js"
+  design_system: "Tailwind CSS + Shadcn/ui"
+  theme: "Dark mode profissional (estilo NOC)"
+  
+  pages:
+    dashboard:
+      path: "/dashboard"
+      features:
+        - "Overview de todas as contas"
+        - "Status geral de saúde"
+        - "Alertas críticos em tempo real"
+        - "Métricas de performance"
+        - "Mapa de serviços por cliente"
+        
+    client_accounts:
+      path: "/accounts"
+      features:
+        - "Lista de contas de clientes"
+        - "Status de conectividade"
+        - "Último sync de dados"
+        - "Ações rápidas (refresh, test connection)"
+        
+    add_account:
+      path: "/accounts/add"
+      features:
+        account_info:
+          - "Nome do cliente"
+          - "Account ID"
+          - "Região principal"
+          - "Contatos (email, slack)"
+          - "SLA tier"
+          
+        authentication_method:
+          cross_account_role:
+            fields:
+              - "Role ARN"
+              - "External ID"
+              - "Session Name"
+            validation:
+              - "Test assume role"
+              - "Verify permissions"
+              
+          iam_keys:
+            fields:
+              - "Access Key ID"
+              - "Secret Access Key"
+              - "Session Token (opcional)"
+            validation:
+              - "Test credentials"
+              - "Check permissions"
+              - "Verify read-only access"
+              
+          temporary_credentials:
+            fields:
+              - "STS Token"
+              - "Duration"
+              - "MFA Token (se necessário)"
+            validation:
+              - "Validate token"
+              - "Check expiration"
+        
+        discovery_settings:
+          - "Auto-discover services"
+          - "Services to monitor (ECS, RDS, Lambda, etc.)"
+          - "Log groups to watch"
+          - "Monitoring frequency"
+          - "Alert thresholds"
+          
+    logs_viewer:
+      path: "/logs"
+      features:
+        - "Stream em tempo real de logs"
+        - "Filtros por cliente/serviço/severidade"
+        - "Análise de IA inline"
+        - "Export de logs"
+        - "Pesquisa avançada"
+        
+    alerts:
+      path: "/alerts"
+      features:
+        - "Central de alertas"
+        - "Triage de incidentes"
+        - "Atribuição de responsáveis"
+        - "Timeline de resolução"
+        - "Escalation rules"
+        
+    analytics:
+      path: "/analytics"
+      features:
+        - "Relatórios por cliente"
+        - "Trending de problemas"
+        - "Performance de IA"
+        - "SLA metrics"
+        - "Cost optimization insights"
+        
+    settings:
+      path: "/settings"
+      features:
+        team_management:
+          - "Usuários do NOC"
+          - "Permissões e roles"
+          - "Turnos e escalation"
+          
+        notification_channels:
+          - "Slack integration"
+          - "Email settings"
+          - "PagerDuty config"
+          - "Webhook endpoints"
+          
+        ai_configuration:
+          - "Bedrock model settings"
+          - "Prompt templates"
+          - "Confidence thresholds"
+          - "Auto-response rules"
+
+# Backend API Endpoints
+api_endpoints:
+  accounts:
+    - "POST /api/accounts" # Adicionar nova conta
+    - "GET /api/accounts" # Listar contas
+    - "PUT /api/accounts/{id}" # Atualizar conta
+    - "DELETE /api/accounts/{id}" # Remover conta
+    - "POST /api/accounts/{id}/test" # Testar conectividade
+    - "POST /api/accounts/{id}/discover" # Descobrir recursos
+    
+  monitoring:
+    - "GET /api/logs/stream" # Stream de logs em tempo real
+    - "GET /api/logs/search" # Pesquisar logs
+    - "POST /api/logs/analyze" # Analisar log com IA
+    - "GET /api/metrics/{account_id}" # Métricas da conta
+    - "GET /api/health/{account_id}" # Status de saúde
+    
+  alerts:
+    - "GET /api/alerts" # Listar alertas
+    - "POST /api/alerts" # Criar alerta manual
+    - "PUT /api/alerts/{id}" # Atualizar alerta
+    - "POST /api/alerts/{id}/ack" # Acknowledge alerta
+    - "POST /api/alerts/{id}/resolve" # Resolver alerta
+    
+  ai:
+    - "POST /api/ai/analyze" # Análise de IA on-demand
+    - "GET /api/ai/insights/{account_id}" # Insights por conta
+    - "POST /api/ai/retrain" # Retreinar modelos
+    - "GET /api/ai/performance" # Métricas de performance IA
+
+# Banco de Dados
+database_schema:
+  tables:
+    client_accounts:
+      fields:
+        - "id (UUID)"
+        - "name (VARCHAR)"
+        - "account_id (VARCHAR)"
+        - "region (VARCHAR)"
+        - "auth_method (ENUM)"
+        - "credentials (JSONB encrypted)"
+        - "status (ENUM: active, inactive, error)"
+        - "last_sync (TIMESTAMP)"
+        - "created_at (TIMESTAMP)"
+        - "updated_at (TIMESTAMP)"
+        
+    monitored_services:
+      fields:
+        - "id (UUID)"
+        - "account_id (UUID FK)"
+        - "service_type (VARCHAR)" # ECS, RDS, Lambda, etc.
+        - "service_name (VARCHAR)"
+        - "service_arn (VARCHAR)"
+        - "monitoring_enabled (BOOLEAN)"
+        - "last_checked (TIMESTAMP)"
+        
+    log_entries:
+      fields:
+        - "id (UUID)"
+        - "account_id (UUID FK)"
+        - "service_id (UUID FK)"
+        - "timestamp (TIMESTAMP)"
+        - "message (TEXT)"
+        - "severity (ENUM)"
+        - "log_group (VARCHAR)"
+        - "log_stream (VARCHAR)"
+        - "ai_analysis (JSONB)"
+        
+    alerts:
+      fields:
+        - "id (UUID)"
+        - "account_id (UUID FK)"
+        - "title (VARCHAR)"
+        - "description (TEXT)"
+        - "severity (ENUM)"
+        - "status (ENUM: open, acknowledged, resolved)"
+        - "assigned_to (UUID FK)"
+        - "created_at (TIMESTAMP)"
+        - "resolved_at (TIMESTAMP)"
+        - "ai_suggestions (JSONB)"
+        
+    noc_users:
+      fields:
+        - "id (UUID)"
+        - "email (VARCHAR)"
+        - "name (VARCHAR)"
+        - "role (ENUM: admin, operator, viewer)"
+        - "slack_user_id (VARCHAR)"
+        - "on_call_schedule (JSONB)"
+        
+    audit_logs:
+      fields:
+        - "id (UUID)"
+        - "user_id (UUID FK)"
+        - "action (VARCHAR)"
+        - "resource_type (VARCHAR)"
+        - "resource_id (VARCHAR)"
+        - "details (JSONB)"
+        - "timestamp (TIMESTAMP)"
+
+# Componentes Frontend Específicos
+frontend_components:
+  account_card:
+    properties:
+      - "Cliente name"
+      - "Account ID"
+      - "Connection status"
+      - "Last sync time"
+      - "Active alerts count"
+      - "Services monitored"
+    actions:
+      - "View details"
+      - "Test connection"
+      - "Edit credentials"
+      - "Force sync"
+      - "View logs"
+      
+  add_account_wizard:
+    steps:
+      step1_basic_info:
+        - "Client name"
+        - "AWS Account ID"
+        - "Primary region"
+        - "Contact information"
+        
+      step2_authentication:
+        tabs:
+          - "Cross-Account Role"
+          - "IAM User Keys"
+          - "Temporary Credentials"
+        validation:
+          - "Real-time connection test"
+          - "Permission verification"
+          
+      step3_discovery:
+        - "Auto-scan available services"
+        - "Select services to monitor"
+        - "Configure log groups"
+        - "Set monitoring intervals"
+        
+      step4_alerts:
+        - "Configure alert thresholds"
+        - "Set notification preferences"
+        - "Define escalation rules"
+        
+  logs_stream:
+    features:
+      - "Real-time WebSocket stream"
+      - "Syntax highlighting"
+      - "AI analysis sidebar"
+      - "Quick actions (create alert, assign)"
+      - "Filter by severity/service/time"
+      
+  ai_insights_panel:
+    sections:
+      - "Quick classification"
+      - "Root cause analysis"
+      - "Suggested actions"
+      - "Similar incidents"
+      - "Confidence score"
+
+# Deployment na Sua Conta AWS
+deployment:
+  infrastructure:
+    compute:
+      ecs_fargate:
+        cluster: "noc-selectnoc-cluster"
+        services:
+          - "noc-api-service"
+          - "noc-collector-service"
+          - "noc-ai-processor"
+          
+    storage:
+      rds_postgresql:
+        instance: "db.r6g.large"
+        multi_az: true
+        encrypted: true
+        
+      s3_buckets:
+        - "noc-selectnoc-logs"
+        - "noc-selectnoc-backups"
+        - "noc-selectnoc-frontend"
+        
+    networking:
+      vpc: "NOC dedicated VPC"
+      alb: "Internal ALB"
+      cloudfront: "Frontend CDN"
+      
+  security:
+    authentication:
+      - "AWS Cognito for NOC users"
+      - "MFA required"
+      - "Role-based access"
+      
+    encryption:
+      - "KMS for sensitive data"
+      - "Encrypted EBS volumes"
+      - "TLS 1.3 everywhere"
+
+# Onboarding Process para Clientes
+client_onboarding:
+  documentation:
+    - "CloudFormation template"
+    - "IAM policy examples"
+    - "Setup guide with screenshots"
+    - "Security best practices"
+    
+  automation:
+    - "Template generator no frontend"
+    - "Automated permission testing"
+    - "Health check dashboard"
+    - "Troubleshooting guide"
+
+# Monitoramento Interno
+internal_monitoring:
+  metrics:
+    - "Accounts monitored"
+    - "Logs processed per minute"
+    - "AI analysis latency"
+    - "Alert response times"
+    - "System availability"
+    
+  alerting:
+    - "Service down alerts"
+    - "High latency warnings"
+    - "Failed authentication attempts"
+    - "Unusual activity patterns"
+
+# Estimativa de Custos (Sua Conta)
+cost_estimate:
+  monthly_infrastructure:
+    compute: "$200-500"
+    database: "$150-300"
+    storage: "$50-150"
+    ai_services: "$100-500"
+    networking: "$30-100"
+    
+  total_monthly: "$530-1550"
+  
+  scaling_factors:
+    - "Number of client accounts"
+    - "Log volume processed"
+    - "AI analysis frequency"
+    - "Alert volume"
+

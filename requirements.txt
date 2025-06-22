@@ -1,0 +1,33 @@
+# Core AWS SDK
+boto3
+botocore
+
+# Amazon Bedrock & AI Services  
+langchain
+langchain-aws
+anthropic
+
+# Core Backend
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+
+# Database & Cache
+psycopg2-binary
+sqlalchemy
+
+# Logging & Monitoring
+structlog
+
+# HTTP Clients
+httpx
+
+# Configuration
+python-dotenv
+pyyaml
+
+# Data Processing (essential only)
+pandas
+numpy
+
