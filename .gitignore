@@ -1,0 +1,92 @@
+# Arquivos de backup
+*backup*
+*.backup
+*.old
+*_backup_*
+*.before_*
+
+# Arquivos temporários de desenvolvimento
+fix_*.py
+simulate_*.py
+test_*.py
+debug_*.py
+enhance_*.py
+improve_*.py
+remove_*.py
+update_*.py
+apply_*.py
+ensure_*.py
+check_*.py
+add_*.py
+create_*.py
+switch_*.py
+force_*.py
+
+# Arquivos HTML temporários
+*-backup*.html
+*-enhanced.html
+*-fixed.html
+*-original*.html
+*-real.html
+*-complete.html
+*-broken.html
+*_temp.html
+advanced_dashboard.html
+dashboard-*.html
+
+# Banco de dados
+*.db
+*.db.*
+selectnoc.db*
+
+# Arquivos de sistema
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# Diretórios de desenvolvimento
+prints_erros/
+data_backup/
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Terraform binários e caches
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+terraform-provider-*
+**/terraform-provider-*

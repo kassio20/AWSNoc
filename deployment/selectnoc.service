@@ -1,0 +1,20 @@
+[Unit]
+Description=SelectNOC IA - AWS Monitoring Platform
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/selectnoc
+Environment=PATH=/opt/selectnoc/venv/bin
+ExecStart=/opt/selectnoc/venv/bin/python backend/app/main.py
+Restart=always
+RestartSec=3
+
+# Logs
+StandardOutput=append:/opt/selectnoc/logs/app.log
+StandardError=append:/opt/selectnoc/logs/error.log
+
+[Install]
+WantedBy=multi-user.target

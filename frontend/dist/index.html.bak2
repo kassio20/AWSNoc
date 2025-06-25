@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelectNOC IA - Dashboard Principal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #f5f6fa;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .nav-tab {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        .nav-tab:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .nav-tab.active {
+            background: white;
+            color: #2c3e50;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .accounts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .account-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .account-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        
+        .account-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .account-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .account-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-active {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+        
+        .status-inactive {
+            background: #ffebee;
+            color: #e74c3c;
+        }
+        
+        .account-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .info-item {
+            text-align: center;
+        }
+        
+        .info-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .info-label {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+        }
+        
+        .account-meta {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            border-top: 1px solid #ecf0f1;
+            padding-top: 1rem;
+        }
+        
+        .add-account-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-bottom: 2rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        .add-account-btn:hover {
+            background: #229954;
+        }
+        
+        .form-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-group input, 
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        .account-details {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .account-details-header {
+            background: #34495e;
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .stats-section {
+            padding: 1.5rem;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-number.success { color: #27ae60; }
+        .stat-number.warning { color: #f39c12; }
+        .stat-number.danger { color: #e74c3c; }
+        
+        .alerts-section {
+            padding: 1.5rem;
+        }
+        
+        .alert-item {
+            padding: 1rem;
+            border-left: 4px solid #e74c3c;
+            background: #fff5f5;
+            margin-bottom: 1rem;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+        
+        .alert-description {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .alert-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: #95a5a6;
+        }
+        
+        .severity-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .severity-medium { background: #ffeaa7; color: #f39c12; }
+        .severity-high { background: #fab1a0; color: #e17055; }
+        .severity-critical { background: #ff7675; color: white; }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #7f8c8d;
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .account-actions {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+
+        .account-card {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛡️ SelectNOC IA - Monitoramento AWS</h1>
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showPage('accounts')">Contas AWS</button>
+            <button class="nav-tab" onclick="showPage('add-account')">➕ Adicionar Conta</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Página de Contas AWS -->
+        <div id="accounts-page" class="page active">
+            <h2>Contas AWS Monitoradas</h2>
+            <div id="accounts-container">
+                <div class="empty-state">
+                    <div class="empty-state-icon">⏳</div>
+                    <div>Carregando contas...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Página de Adicionar Conta -->
+        <div id="add-account-page" class="page">
+            <div class="form-section">
+                <h2>Adicionar Nova Conta AWS</h2>
+                <form id="account-form">
+                    <div class="form-group">
+                        <label for="account-name">Nome da Conta</label>
+                        <input type="text" id="account-name" required placeholder="Ex: Produção, Desenvolvimento, Teste">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="account-id">Account ID</label>
+                        <input type="text" id="account-id" required placeholder="123456789012">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="region">Região Principal</label>
+                        <select id="region" required>
+                            <option value="">Selecione uma região</option>
+                            <option value="us-east-1">US East (N. Virginia)</option>
+                            <option value="us-east-2">US East (Ohio)</option>
+                            <option value="us-west-1">US West (N. California)</option>
+                            <option value="us-west-2">US West (Oregon)</option>
+                            <option value="sa-east-1">South America (São Paulo)</option>
+                            <option value="eu-west-1">Europe (Ireland)</option>
+                            <option value="eu-central-1">Europe (Frankfurt)</option>
+                            <option value="ap-southeast-1">Asia Pacific (Singapore)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="access-key">AWS Access Key ID</label>
+                        <input type="text" id="access-key" required placeholder="AKIA...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="secret-key">AWS Secret Access Key</label>
+                        <input type="password" id="secret-key" required placeholder="••••••••••••">
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">💾 Adicionar Conta</button>
+                        <button type="button" class="btn btn-secondary" onclick="showPage('accounts')">❌ Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Página de Detalhes da Conta -->
+        <div id="account-details-page" class="page">
+            <div class="account-details">
+                <div class="account-details-header">
+                    <h2 id="details-account-name">Nome da Conta</h2>
+                    <button class="back-btn" onclick="showPage('accounts')">⬅ Voltar</button>
+                </div>
+                
+                <div class="stats-section">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number success" id="details-total-resources">-</div>
+                            <div class="stat-label">Recursos Monitorados</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number success" id="details-healthy-resources">-</div>
+                            <div class="stat-label">Recursos Saudáveis</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number warning" id="details-warning-alerts">-</div>
+                            <div class="stat-label">Alertas Warning</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number danger" id="details-critical-alerts">-</div>
+                            <div class="stat-label">Alertas Críticos</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alerts-section">
+                    <h3>🚨 Alertas Ativos</h3>
+                    <div id="details-alerts-container">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">⏳</div>
+                            <div>Carregando alertas...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAccount = null;
+        
+        function showPage(pageId) {
+            // Esconder todas as páginas
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Remover classe active de todas as tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Mostrar página selecionada
+            document.getElementById(pageId + '-page').classList.add('active');
+            
+            // Adicionar classe active na tab correta
+            if (pageId === 'accounts') {
+                document.querySelector('.nav-tab:first-child').classList.add('active');
+                carregarContas();
+            } else if (pageId === 'add-account') {
+                document.querySelector('.nav-tab:last-child').classList.add('active');
+            }
+        }
+        
+        async function carregarContas() {
+            try {
+                const response = await fetch('/api/v1/accounts?' + Date.now());
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                const container = document.getElementById('accounts-container');
+                
+                if (!data.accounts || data.accounts.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🏢</div>
+                            <div>Nenhuma conta AWS cadastrada</div>
+                            <button class="add-account-btn" onclick="showPage('add-account')">
+                                ➕ Adicionar Primeira Conta
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = '';
+                
+                for (const account of data.accounts) {
+                    // Buscar estatísticas da conta
+                    let stats = {
+                        total_resources: 0,
+                        healthy: 0,
+                        active_alerts: 0
+                    };
+                    
+                    try {
+                        const statsResponse = await fetch(`/api/v1/accounts/${account.id}/monitoring?` + Date.now());
+                        if (statsResponse.ok) {
+                            const statsData = await statsResponse.json();
+                            stats = {
+                                total_resources: statsData.total_resources || 0,
+                                healthy: statsData.health_status?.healthy || 0,
+                                active_alerts: statsData.active_alerts || 0
+                            };
+                        }
+                    } catch (e) {
+                        console.warn('Erro ao carregar stats da conta:', e);
+                    }
+                    
+                    const accountCard = document.createElement('div');
+                    accountCard.className = 'account-card';
+                    accountCard.onclick = () => mostrarDetalhesAccount(account);
+                    accountCard.innerHTML = `
+                        <div class="account-actions">
+                            <button class="delete-btn" onclick="event.stopPropagation(); excluirConta(${account.id})">🗑️</button>
+                        </div>
+                        <div class="account-header">
+                            <div class="account-name">${account.name}</div>
+                            <div class="account-status status-${account.status}">
+                                ${account.status}
+                            </div>
+                        </div>
+                        <div class="account-info">
+                            <div class="info-item">
+                                <div class="info-value">${stats.total_resources}</div>
+                                <div class="info-label">Recursos</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-value">${stats.active_alerts}</div>
+                                <div class="info-label">Alertas</div>
+                            </div>
+                        </div>
+                        <div class="account-meta">
+                            <div>Account ID: ${account.account_id}</div>
+                            <div>Região: ${account.region}</div>
+                            <div>Criado: ${new Date(account.created_at).toLocaleDateString('pt-BR')}</div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(accountCard);
+                }
+                
+            } catch (error) {
+                console.error('Erro ao carregar contas:', error);
+                document.getElementById('accounts-container').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <div>Erro ao carregar contas: ${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+        
+        async function mostrarDetalhesAccount(account) {
+            currentAccount = account;
+            document.getElementById('details-account-name').textContent = account.name;
+            
+            // Mostrar página de detalhes
+            showPage('account-details');
+            
+            try {
+                // Carregar dados de monitoramento
+                const statsResponse = await fetch(`/api/v1/accounts/${account.id}/monitoring?` + Date.now());
+                const statsData = await statsResponse.json();
+                
+                document.getElementById('details-total-resources').textContent = statsData.total_resources || 0;
+                document.getElementById('details-healthy-resources').textContent = statsData.health_status?.healthy || 0;
+                document.getElementById('details-warning-alerts').textContent = statsData.alert_counts?.medium || 0;
+                document.getElementById('details-critical-alerts').textContent = (statsData.alert_counts?.high || 0) + (statsData.alert_counts?.critical || 0);
+                
+                // Carregar alertas
+                const alertsResponse = await fetch(`/api/v1/accounts/${account.id}/alerts?` + Date.now());
+                const alertsData = await alertsResponse.json();
+                
+                const alertsContainer = document.getElementById('details-alerts-container');
+                alertsContainer.innerHTML = '';
+                
+                if (alertsData.alerts && alertsData.alerts.length > 0) {
+                    alertsData.alerts.forEach(alert => {
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert-item';
+                        alertDiv.innerHTML = `
+                            <div class="alert-title">${alert.title}</div>
+                            <div class="alert-description">${alert.description}</div>
+                            <div class="alert-meta">
+                                <span class="severity-badge severity-${alert.severity}">${alert.severity}</span>
+                                <span>Tipo: ${alert.resource_type}</span>
+                                <span>Criado: ${new Date(alert.created_at).toLocaleString('pt-BR')}</span>
+                            </div>
+                        `;
+                        alertsContainer.appendChild(alertDiv);
+                    });
+                } else {
+                    alertsContainer.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">✅</div>
+                            <div>Nenhum alerta ativo</div>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Erro ao carregar detalhes:', error);
+            }
+        }
+        
+        async function excluirConta(accountId) {
+            if (!confirm('Tem certeza que deseja excluir esta conta?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/v1/accounts/${accountId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    carregarContas(); // Recarregar lista
+                } else {
+                    alert('Erro ao excluir conta');
+                }
+            } catch (error) {
+                alert('Erro ao excluir conta: ' + error.message);
+            }
+        }
+        
+        // Formulário de adicionar conta
+        document.getElementById('account-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('account-name').value,
+                account_id: document.getElementById('account-id').value,
+                region: document.getElementById('region').value,
+                access_key: document.getElementById('access-key').value,
+                secret_key: document.getElementById('secret-key').value
+            };
+            
+            try {
+                document.body.classList.add('loading');
+                
+                const response = await fetch('/api/v1/accounts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    // Limpar formulário
+                    document.getElementById('account-form').reset();
+                    // Voltar para página de contas
+                    showPage('accounts');
+                    alert('Conta adicionada com sucesso!');
+                } else {
+                    const error = await response.json();
+                    alert('Erro ao adicionar conta: ' + (error.detail || 'Erro desconhecido'));
+                }
+                
+            } catch (error) {
+                alert('Erro ao adicionar conta: ' + error.message);
+            } finally {
+                document.body.classList.remove('loading');
+            }
+        });
+        
+        // Carregar contas ao inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarContas();
+        });
+    </script>
+</body>
+</html>
+

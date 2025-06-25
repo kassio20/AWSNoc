@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelectNOC IA - Detalhes da Conta (ALERTAS REAIS)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #0d1117, #161b22); 
+            color: #e6edf3; 
+            font-family: 'Segoe UI', sans-serif; 
+            min-height: 100vh; 
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .header { text-align: center; margin-bottom: 3rem; }
+        .title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(45deg, #58a6ff, #79c0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .section { background: rgba(33, 38, 45, 0.8); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; border: 1px solid #30363d; }
+        .section-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; color: #f0f6fc; }
+        .alert-card { 
+            background: linear-gradient(135deg, #da3633, #f85149); 
+            border-radius: 8px; 
+            padding: 1.5rem; 
+            margin-bottom: 1rem; 
+            border-left: 4px solid #ff4444; 
+            cursor: pointer; 
+            transition: transform 0.2s; 
+        }
+        .alert-card:hover { transform: translateY(-2px); }
+        .alert-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; color: white; }
+        .alert-description { font-size: 0.9rem; margin-bottom: 1rem; color: rgba(255,255,255,0.9); }
+        .alert-meta { font-size: 0.8rem; color: rgba(255,255,255,0.7); font-family: 'Courier New', monospace; }
+        .loading { text-align: center; padding: 2rem; }
+        .spinner { border: 3px solid #30363d; border-top: 3px solid #58a6ff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .refresh-btn { background: #238636; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; margin-bottom: 1rem; }
+        .refresh-btn:hover { background: #2ea043; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🚨 SelectNOC IA - Alertas REAIS</h1>
+            <p>Monitoramento em tempo real - SEM dados simulados</p>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">🚨 Alertas Ativos REAIS</h2>
+            <button class="refresh-btn" onclick="forceRefresh()">🔄 Atualizar Alertas Reais</button>
+            <div id="alerts-container">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Carregando alertas reais...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        const currentAccountId = new URLSearchParams(window.location.search).get('id') || 1;
+
+        // FORÇAR carregamento de alertas reais na inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔄 Carregando alertas REAIS...');
+            forceRefresh();
+        });
+
+        async function forceRefresh() {
+            const container = document.getElementById('alerts-container');
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Executando verificação de saúde em tempo real...</p>
+                </div>
+            `;
+
+            try {
+                // PRIMEIRO: Force refresh para garantir alertas reais
+                console.log('🔄 Executando force refresh...');
+                await fetch(`${API_BASE}/api/v1/alerts/force-refresh`, { method: 'GET' });
+                
+                // SEGUNDO: Buscar alertas da conta
+                console.log('📡 Buscando alertas da conta...');
+                const response = await fetch(`${API_BASE}/api/v1/accounts/${currentAccountId}/alerts?cache_bust=${Date.now()}`);
+                const data = await response.json();
+
+                console.log('📊 Dados recebidos:', data);
+
+                if (response.ok) {
+                    displayRealAlerts(data.alerts || []);
+                } else {
+                    throw new Error(data.detail || 'Erro ao carregar alertas reais');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao carregar alertas reais:', error);
+                container.innerHTML = `
+                    <div style="text-align: center; color: #f85149;">
+                        <h3>❌ Erro ao carregar alertas reais</h3>
+                        <p>${error.message}</p>
+                        <button class="refresh-btn" onclick="forceRefresh()">🔄 Tentar Novamente</button>
+                    </div>
+                `;
+            }
+        }
+
+        function displayRealAlerts(alerts) {
+            const container = document.getElementById('alerts-container');
+            
+            console.log(`📊 Exibindo ${alerts.length} alertas reais`);
+            
+            if (alerts.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #238636;">
+                        <h3>✅ Nenhum alerta real encontrado</h3>
+                        <p>Todos os recursos estão funcionando normalmente</p>
+                        <p><small>Última verificação: ${new Date().toLocaleString('pt-BR')}</small></p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div style="margin-bottom: 1rem; color: #f85149;">
+                    <strong>🔴 ${alerts.length} ALERTAS REAIS DETECTADOS</strong>
+                    <br><small>Última verificação: ${new Date().toLocaleString('pt-BR')}</small>
+                </div>
+                ${alerts.map(alert => `
+                    <div class="alert-card">
+                        <div class="alert-title">🚨 ${alert.title}</div>
+                        <div class="alert-description">${alert.description || 'Sem descrição disponível'}</div>
+                        <div class="alert-meta">
+                            <strong>Recurso:</strong> ${alert.resource_id}<br>
+                            <strong>Tipo:</strong> ${alert.resource_type}<br>
+                            <strong>Severidade:</strong> ${alert.severity}<br>
+                            <strong>Conta:</strong> ${alert.account_name} (${alert.aws_account_id})<br>
+                            <strong>Detectado em:</strong> ${new Date(alert.created_at).toLocaleString('pt-BR')}
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        }
+    </script>
+</body>
+</html>

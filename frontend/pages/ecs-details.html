@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS NOC - Detalhes do ECS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            color: #e6edf3; 
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .back-btn {
+            background: #21262d;
+            color: #e6edf3;
+            border: 1px solid #30363d;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #30363d;
+            border-color: #58a6ff;
+        }
+
+        .service-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .service-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .service-title {
+            font-size: 2rem;
+            color: #58a6ff;
+            margin-bottom: 0.5rem;
+        }
+
+        .service-subtitle {
+            color: #8b949e;
+        }
+
+        .summary-container {
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-title {
+            color: #e6edf3;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .metric-box {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .metric-box:hover {
+            border-color: #58a6ff;
+            transform: translateY(-2px);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: #8b949e;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .services-container {
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 2rem;
+        }
+
+        .services-title {
+            color: #e6edf3;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .last-update {
+            color: #8b949e;
+            font-size: 0.875rem;
+        }
+
+        .service-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .service-card:hover {
+            border-color: #58a6ff;
+            transform: translateY(-2px);
+        }
+
+        .service-card.healthy {
+            border-left: 4px solid #3fb950;
+        }
+
+        .service-card.degraded {
+            border-left: 4px solid #d29922;
+        }
+
+        .service-card.unhealthy {
+            border-left: 4px solid #f85149;
+        }
+
+        .service-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .service-name {
+            color: #e6edf3;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-badge.healthy {
+            background: #1a7f37;
+            color: white;
+        }
+
+        .status-badge.degraded {
+            background: #bf8700;
+            color: white;
+        }
+
+        .status-badge.unhealthy {
+            background: #da3633;
+            color: white;
+        }
+
+        .service-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .detail-label {
+            color: #8b949e;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: #e6edf3;
+            font-weight: 600;
+        }
+
+        .details-button {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+        }
+
+        .details-button:hover {
+            background: #2ea043;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: #8b949e;
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            background: #21262d;
+            border: 1px solid #f85149;
+            border-radius: 8px;
+            color: #f85149;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/" class="back-btn">← Voltar ao Dashboard</a>
+    </div>
+
+    <div class="service-header">
+        <div class="service-icon">🐳</div>
+        <h1 class="service-title">ECS - Serviços e Containers</h1>
+        <p class="service-subtitle">Monitoramento de containers e serviços</p>
+    </div>
+
+    <div class="summary-container">
+        <h2 class="summary-title">📊 Resumo Geral</h2>
+        <div id="summary-content" class="summary-grid">
+            <!-- Será preenchido pelo JavaScript -->
+        </div>
+    </div>
+
+    <div class="services-container">
+        <div class="services-title">
+            <h2>🔧 Serviços ECS</h2>
+            <span id="last-update" class="last-update">Última atualização: --</span>
+        </div>
+        <div id="services-content">
+            <!-- Será preenchido pelo JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        const accountId = new URLSearchParams(window.location.search).get("account");
+        const API_BASE = window.location.origin;
+        let currentServices = [];
+
+        async function fetchServices() {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/ecs/${accountId}/services`);
+                const data = await response.json();
+                
+                console.log('Dados recebidos:', data);
+                
+                currentServices = data.services || [];
+                
+                displaySummary(data.summary);
+                displayServices(currentServices);
+                
+                document.getElementById("last-update").textContent = `Última atualização: ${new Date().toLocaleTimeString("pt-BR")}`;
+                
+            } catch (error) {
+                console.error("Erro ao buscar serviços ECS:", error);
+                document.getElementById("services-content").innerHTML = `
+                    <div class="error">
+                        <h3>⚠️ Erro ao carregar serviços ECS</h3>
+                        <p>${error.message}</p>
+                        <p>Verifique as credenciais AWS e permissões ECS da conta.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displaySummary(summary) {
+            if (!summary) {
+                document.getElementById("summary-content").innerHTML = `
+                    <div class="metric-box">
+                        <div class="metric-value">0</div>
+                        <div class="metric-label">Total de Serviços</div>
+                    </div>
+                `;
+                return;
+            }
+
+            document.getElementById("summary-content").innerHTML = `
+                <div class="metric-box">
+                    <div class="metric-value">${summary.total_services || 0}</div>
+                    <div class="metric-label">Total de Serviços</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value" style="color: #3fb950">${summary.healthy_services || 0}</div>
+                    <div class="metric-label">Saudáveis</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value" style="color: #d29922">${summary.degraded_services || 0}</div>
+                    <div class="metric-label">Degradados</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value" style="color: #f85149">${summary.unhealthy_services || 0}</div>
+                    <div class="metric-label">Não Saudáveis</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value">${summary.total_running_tasks || 0}</div>
+                    <div class="metric-label">Tasks Rodando</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value">${summary.total_desired_tasks || 0}</div>
+                    <div class="metric-label">Tasks Desejadas</div>
+                </div>
+            `;
+        }
+
+        function displayServices(services) {
+            if (!services || services.length === 0) {
+                document.getElementById("services-content").innerHTML = `
+                    <div class="no-data">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">🐳</div>
+                        <h3>Nenhum serviço ECS encontrado</h3>
+                        <p>Esta conta AWS não possui serviços ECS configurados no momento.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const servicesHtml = services.map((service, index) => `
+                <div class="service-card ${service.status}">
+                    <div class="service-card-header">
+                        <div class="service-name">${service.name || 'Nome não disponível'}</div>
+                        <span class="status-badge ${service.status}">${getStatusText(service.status)}</span>
+                    </div>
+                    <div class="service-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Tasks:</span>
+                            <span class="detail-value">${service.running_tasks || 0}/${service.desired_tasks || 0}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">CPU:</span>
+                            <span class="detail-value">${service.cpu_utilization || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Memória:</span>
+                            <span class="detail-value">${service.memory_utilization || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Cluster:</span>
+                            <span class="detail-value">${service.cluster || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Launch Type:</span>
+                            <span class="detail-value">${service.launch_type || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Task Definition:</span>
+                            <span class="detail-value">${service.task_definition || 'N/A'}</span>
+                        </div>
+                    </div>
+                    <button onclick="showServiceDetails(${index})" class="details-button">
+                        Ver Detalhes Completos
+                    </button>
+                </div>
+            `).join('');
+
+            document.getElementById("services-content").innerHTML = servicesHtml;
+        }
+
+        function getStatusText(status) {
+            switch (status) {
+                case 'healthy': return '✅ Saudável';
+                case 'degraded': return '⚠️ Degradado';
+                case 'unhealthy': return '❌ Não Saudável';
+                default: return '❓ Desconhecido';
+            }
+        }
+
+        function showServiceDetails(serviceIndex) {
+            try {
+                const service = currentServices[serviceIndex];
+                if (!service) {
+                    alert('Erro: Serviço não encontrado');
+                    return;
+                }
+                
+                const details = `DETALHES DO SERVIÇO ECS
+
+🏷️  Nome: ${service.name}
+📊 Status: ${getStatusText(service.status)}
+🔢 Tasks: ${service.running_tasks}/${service.desired_tasks}
+💻 CPU: ${service.cpu_utilization || 'N/A'}
+🧠 Memória: ${service.memory_utilization || 'N/A'}
+🏗️  Cluster: ${service.cluster}
+🚀 Launch Type: ${service.launch_type}
+📦 Task Definition: ${service.task_definition}
+📅 Criado em: ${service.created_at ? new Date(service.created_at).toLocaleString('pt-BR') : 'N/A'}
+🔗 ARN: ${service.service_arn}`;
+                
+                alert(details);
+            } catch (error) {
+                console.error('Erro ao mostrar detalhes:', error);
+                alert('Erro ao carregar detalhes do serviço');
+            }
+        }
+
+        // Carregar dados iniciais
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchServices();
+            // Atualizar a cada 30 segundos
+            setInterval(fetchServices, 30000);
+        });
+    </script>
+</body>
+</html>

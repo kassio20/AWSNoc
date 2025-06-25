@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS-NOC - SIMPLE WORKING 1750627859</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0d1117, #161b22);
+            color: #e6edf3;
+            min-height: 100vh;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        
+        .header { text-align: center; margin-bottom: 3rem; }
+        .title { 
+            font-size: 2.5rem; 
+            font-weight: 700; 
+            margin-bottom: 1rem; 
+            background: linear-gradient(45deg, #58a6ff, #79c0ff); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+
+        .account-header {
+            background: rgba(33, 38, 45, 0.8);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid #30363d;
+        }
+
+        .account-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+        .info-item { background: rgba(45, 51, 59, 0.5); padding: 1rem; border-radius: 8px; }
+        .info-label { font-size: 0.9rem; color: #7d8590; margin-bottom: 0.5rem; }
+        .info-value { font-size: 1.1rem; font-weight: 600; color: #f0f6fc; }
+
+        .section { 
+            background: rgba(33, 38, 45, 0.8); 
+            border-radius: 12px; 
+            padding: 2rem; 
+            margin-bottom: 2rem; 
+            border: 1px solid #30363d; 
+        }
+        
+        .section-title { 
+            font-size: 1.5rem; 
+            font-weight: 600; 
+            margin-bottom: 1.5rem; 
+            color: #f0f6fc; 
+        }
+
+        .loading { text-align: center; padding: 3rem; }
+        .spinner { 
+            border: 3px solid #30363d; 
+            border-top: 3px solid #58a6ff; 
+            border-radius: 50%; 
+            width: 40px; 
+            height: 40px; 
+            animation: spin 1s linear infinite; 
+            margin: 0 auto 1rem; 
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .resources-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+        .resource-card { 
+            background: rgba(45, 51, 59, 0.5); 
+            border-radius: 8px; 
+            padding: 1rem; 
+            border-left: 4px solid #58a6ff; 
+        }
+        .resource-type { font-size: 0.8rem; color: #58a6ff; margin-bottom: 0.5rem; }
+        .resource-name { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .resource-id { font-size: 0.8rem; color: #7d8590; font-family: 'Courier New', monospace; }
+
+        .alert-card { 
+            background: linear-gradient(135deg, #da3633, #f85149); 
+            border-radius: 8px; 
+            padding: 1.5rem; 
+            margin-bottom: 1rem; 
+            border-left: 4px solid #ff4444; 
+            cursor: pointer; 
+            transition: transform 0.2s; 
+        }
+        .alert-card:hover { transform: translateY(-2px); }
+        .alert-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; color: white; }
+        .alert-description { font-size: 0.9rem; margin-bottom: 1rem; color: rgba(255,255,255,0.9); }
+        .alert-meta { font-size: 0.8rem; color: rgba(255,255,255,0.7); font-family: 'Courier New', monospace; }
+
+        .modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.8); 
+        }
+        .modal-content { 
+            background: linear-gradient(135deg, #0d1117, #161b22); 
+            margin: 5% auto; 
+            padding: 2rem; 
+            border-radius: 12px; 
+            width: 90%; 
+            max-width: 800px; 
+            border: 1px solid #30363d; 
+            max-height: 80vh; 
+            overflow-y: auto; 
+        }
+        .close { 
+            color: #7d8590; 
+            float: right; 
+            font-size: 28px; 
+            font-weight: bold; 
+            cursor: pointer; 
+        }
+        .close:hover { color: #f0f6fc; }
+
+        .ai-analysis { 
+            background: rgba(88, 166, 255, 0.1); 
+            border-left: 4px solid #58a6ff; 
+            padding: 1rem; 
+            margin: 1rem 0; 
+            border-radius: 8px; 
+        }
+        .ai-analysis h4 { color: #58a6ff; margin-bottom: 0.5rem; }
+
+        .refresh-btn { 
+            background: #238636; 
+            color: white; 
+            border: none; 
+            padding: 0.5rem 1rem; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            margin-bottom: 1rem; 
+        }
+        .refresh-btn:hover { background: #2ea043; }
+
+        .stats { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 1rem; 
+            margin-bottom: 2rem; 
+        }
+        .stat-card { 
+            background: rgba(45, 51, 59, 0.5); 
+            padding: 1rem; 
+            border-radius: 8px; 
+            text-align: center; 
+        }
+        .stat-number { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .stat-label { font-size: 0.9rem; color: #7d8590; }
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .service-card {
+            background: rgba(45, 51, 59, 0.5);
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card:hover {
+            transform: translateY(-2px);
+            border-color: #58a6ff;
+            box-shadow: 0 8px 25px rgba(88, 166, 255, 0.15);
+        }
+
+        .service-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .service-icon {
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(88, 166, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .service-card h3 {
+            flex: 1;
+            margin: 0;
+            font-size: 1.2rem;
+            color: #f0f6fc;
+        }
+
+        .service-count {
+            background: #58a6ff;
+            color: #0d1117;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .service-resources {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .resource-preview {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: rgba(33, 38, 45, 0.5);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .resource-name {
+            color: #e6edf3;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+
+        .resource-status {
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-running, .status-available, .status-healthy {
+            background: rgba(35, 134, 54, 0.3);
+            color: #3fb950;
+        }
+
+        .status-stopped, .status-unavailable, .status-unhealthy {
+            background: rgba(248, 81, 73, 0.3);
+            color: #f85149;
+        }
+
+        .status-pending, .status-starting {
+            background: rgba(219, 154, 4, 0.3);
+            color: #d29922;
+        }
+
+        .more-resources {
+            color: #7d8590;
+            font-style: italic;
+            justify-content: center;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #58a6ff, #79c0ff);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .service-card:hover::before {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">AWS-NOC - Detalhes da Conta</h1>
+        </div>
+
+        <div id="account-info" class="account-header">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Carregando informações da conta...</p>
+            </div>
+        </div>
+
+        <div class="stats" id="stats-container">
+            <div class="stat-card">
+                <div class="stat-number" id="resources-count">-</div>
+                <div class="stat-label">Recursos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="alerts-count">-</div>
+                <div class="stat-label">Alertas Ativos</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">📦 Recursos AWS</h2>
+            <div id="resources-container">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Carregando recursos...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">🚨 Alertas Ativos</h2>
+            <button class="refresh-btn" onclick="forceRefreshAlerts()">🔄 Atualizar Alertas</button>
+            <div id="alerts-container">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Carregando alertas...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para detalhes do alerta -->
+    <div id="alertModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="alert-details"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin + ':8000';
+        let currentAccountId = null;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        currentAccountId = urlParams.get('account');
+
+        if (!currentAccountId) {
+            alert('ID da conta não fornecido');
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadAccountInfo();
+            await loadResources();
+            await loadAlerts();
+        });
+
+        async function loadAccountInfo() {
+            try {
+                const url = `${API_BASE}/api/v1/accounts/${currentAccountId}`;
+                const response = await fetch(url);
+                const account = await response.json();
+
+                if (response.ok) {
+                    displayAccountInfo(account);
+                } else {
+                    throw new Error(account.detail || 'Erro ao carregar conta');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar conta:', error);
+                document.getElementById('account-info').innerHTML = 
+                    `<div style="text-align: center; color: #da3633;">Erro ao carregar informações da conta: ${error.message}</div>`;
+            }
+        }
+
+        function displayAccountInfo(account) {
+            document.getElementById('account-info').innerHTML = `
+                <div class="account-info">
+                    <div class="info-item">
+                        <div class="info-label">Nome da Conta</div>
+                        <div class="info-value">${account.name}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">ID da Conta AWS</div>
+                        <div class="info-value">${account.account_id}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Região</div>
+                        <div class="info-value">${account.region}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Status</div>
+                        <div class="info-value" style="color: #28a745;">${account.status}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Serviços Monitorados</div>
+                        <div class="info-value">${account.services.join(', ')}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadResources() {
+            const container = document.getElementById('resources-container');
+            
+            try {
+                const url = `${API_BASE}/api/v1/accounts/${currentAccountId}/resources`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayResources(data.resources || []);
+                    document.getElementById('resources-count').textContent = data.resources ? data.resources.length : 0;
+                } else {
+                    throw new Error(data.detail || 'Erro ao carregar recursos');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar recursos:', error);
+                container.innerHTML = `
+                    <div style="text-align: center; color: #da3633;">
+                        <h3>Erro ao carregar recursos</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayResources(resources) {
+            const container = document.getElementById("resources-container");
+            
+            // Filtrar apenas serviços essenciais
+            const essentialServices = {
+                "EC2_Instance": "EC2",
+                "RDS_Instance": "RDS", 
+                "ECS_Service": "ECS",
+                "ECS_Cluster": "ECS",
+                "ElastiCache_Cluster": "ElastiCache",
+                "LoadBalancer": "Load Balancer",
+                "TargetGroup": "Load Balancer"
+            };
+            
+            const filteredResources = resources.filter(resource => 
+                Object.keys(essentialServices).some(key => resource.resource_type.includes(key))
+            );
+            
+            if (filteredResources.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #7d8590;">
+                        <h3>📦 Nenhum recurso essencial encontrado</h3>
+                        <p>Execute a descoberta de recursos para encontrar EC2, RDS, ECS, ElastiCache e Load Balancers</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Agrupar por tipo de serviço
+            const groupedResources = {};
+            filteredResources.forEach(resource => {
+                const serviceType = Object.keys(essentialServices).find(key => 
+                    resource.resource_type.includes(key)
+                );
+                const serviceName = essentialServices[serviceType];
+                
+                if (!groupedResources[serviceName]) {
+                    groupedResources[serviceName] = [];
+                }
+                groupedResources[serviceName].push(resource);
+            });
+
+            const serviceIcons = {
+                "EC2": "🖥️",
+                "RDS": "🗄️", 
+                "ECS": "🐳",
+                "ElastiCache": "⚡",
+                "Load Balancer": "⚖️"
+            };
+
+            container.innerHTML = `
+                <div class="services-grid">
+                    ${Object.keys(groupedResources).map(serviceName => `
+                        <div class="service-card" onclick="viewServiceDetails('${serviceName.toLowerCase()}', ${JSON.stringify(groupedResources[serviceName]).replace(/"/g, "&quot;")})">
+                            <div class="service-header">
+                                <span class="service-icon">${serviceIcons[serviceName]}</span>
+                                <h3>${serviceName}</h3>
+                                <span class="service-count">${groupedResources[serviceName].length}</span>
+                            </div>
+                            <div class="service-resources">
+                                ${groupedResources[serviceName].slice(0, 3).map(resource => `
+                                    <div class="resource-preview">
+                                        <span class="resource-name">${resource.name || resource.resource_id}</span>
+                                        <span class="resource-status status-${resource.status}">${resource.status}</span>
+                                    </div>
+                                `).join("")}
+                                ${groupedResources[serviceName].length > 3 ? `
+                                    <div class="resource-preview more-resources">
+                                        +${groupedResources[serviceName].length - 3} mais recursos
+                                    </div>
+                                ` : ""}
+                            </div>
+                        </div>
+                    `).join("")}
+                </div>
+            `;
+        }
+
+        function viewServiceDetails(serviceType, resources) {
+            // Mapear nomes dos serviços para URLs
+            const serviceMap = {
+                "ec2": "ec2",
+                "rds": "rds",
+                "ecs": "ecs",
+                "elasticache": "elasticache",
+                "load balancer": "loadbalancer"
+            };
+            
+            const serviceName = serviceMap[serviceType.toLowerCase()] || serviceType.toLowerCase();
+            const accountId = new URLSearchParams(window.location.search).get("account");
+            window.location.href = `/${serviceName}-details.html?account=${accountId}`;
+        }
+
+        async function forceRefreshAlerts() {
+            await loadAlerts(true);
+        }
+
+        async function loadAlerts(forceRefresh = false) {
+            const container = document.getElementById('alerts-container');
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Carregando alertas reais...</p>
+                </div>
+            `;
+
+            try {
+                if (forceRefresh) {
+                    await fetch(`${API_BASE}/api/v1/alerts/force-refresh`);
+                }
+
+                const url = `${API_BASE}/api/v1/accounts/${currentAccountId}/alerts?cache_bust=${Date.now()}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayAlerts(data.alerts || []);
+                    document.getElementById('alerts-count').textContent = data.alerts ? data.alerts.length : 0;
+                } else {
+                    throw new Error(data.detail || 'Erro ao carregar alertas');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar alertas:', error);
+                container.innerHTML = `
+                    <div style="text-align: center; color: #da3633;">
+                        <h3>Erro ao carregar alertas</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayAlerts(alerts) {
+            const container = document.getElementById('alerts-container');
+            
+            if (alerts.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #238636;">
+                        <h3>✅ Nenhum alerta ativo</h3>
+                        <p>Todos os recursos estão funcionando normalmente</p>
+                        <p><small>Última verificação: ${new Date().toLocaleString('pt-BR')}</small></p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = alerts.map(alert => `
+                <div class="alert-card" onclick="showAlertDetails(${alert.id})">
+                    <div class="alert-title">🚨 ${alert.title}</div>
+                    <div class="alert-description">${alert.description || 'Sem descrição disponível'}</div>
+                    <div class="alert-meta">
+                        <strong>Recurso:</strong> ${alert.resource_id}<br>
+                        <strong>Tipo:</strong> ${alert.resource_type}<br>
+                        <strong>Severidade:</strong> ${alert.severity}<br>
+                        <strong>Detectado em:</strong> ${new Date(alert.created_at).toLocaleString('pt-BR')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function showAlertDetails(alertId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/alerts/${alertId}`);
+                const alert = await response.json();
+
+                if (response.ok) {
+                    displayAlertModal(alert);
+                } else {
+                    throw new Error(alert.detail || 'Erro ao carregar detalhes do alerta');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar detalhes do alerta:', error);
+                alert('Erro ao carregar detalhes do alerta: ' + error.message);
+            }
+        }
+
+        function displayAlertModal(alert) {
+            const modal = document.getElementById('alertModal');
+            const detailsContainer = document.getElementById('alert-details');
+
+            let aiAnalysisHtml = '';
+            if (alert.ai_analysis) {
+                const analysis = typeof alert.ai_analysis === 'string' ? JSON.parse(alert.ai_analysis) : alert.ai_analysis;
+                aiAnalysisHtml = `
+                    <div class="ai-analysis">
+                        <h4>🤖 Análise de IA</h4>
+                        <pre style="white-space: pre-wrap; font-family: monospace; font-size: 0.9rem;">${JSON.stringify(analysis, null, 2)}</pre>
+                    </div>
+                `;
+            }
+
+            detailsContainer.innerHTML = `
+                <h2 style="color: #f85149; margin-bottom: 1rem;">${alert.title}</h2>
+                
+                <div style="margin-bottom: 1rem;">
+                    <strong>Descrição:</strong><br>
+                    ${alert.description || 'Sem descrição disponível'}
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>Detalhes do Recurso:</strong><br>
+                    <code style="background: rgba(45, 51, 59, 0.5); padding: 0.5rem; border-radius: 4px; display: block; margin-top: 0.5rem;">
+                        ID: ${alert.resource_id}<br>
+                        Tipo: ${alert.resource_type}<br>
+                        Severidade: ${alert.severity}<br>
+                        Status: ${alert.status}
+                    </code>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <strong>Temporização:</strong><br>
+                    Detectado em: ${new Date(alert.created_at).toLocaleString('pt-BR')}<br>
+                    ${alert.resolved_at ? `Resolvido em: ${new Date(alert.resolved_at).toLocaleString('pt-BR')}` : 'Ainda não resolvido'}
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <button id="analyze-btn-${alert.id}" onclick="analyzeAlert(${alert.id})" 
+                            style="background: #238636; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer;">
+                        🧠 Executar Análise de IA
+                    </button>
+                </div>
+                <div id="ai-result-${alert.id}"></div>
+
+                ${aiAnalysisHtml}
+            `;
+
+            modal.style.display = 'block';
+        }
+
+        // Modal controls
+        document.querySelector('.close').onclick = function() {
+            document.getElementById('alertModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+function displayAlertModal(alert) {
+    const modal = document.getElementById('alertModal');
+    const detailsContainer = document.getElementById('alert-details');
+
+    let aiAnalysisHtml = '';
+    if (alert.ai_analysis) {
+        const analysis = typeof alert.ai_analysis === 'string' ? JSON.parse(alert.ai_analysis) : alert.ai_analysis;
+        aiAnalysisHtml = `
+            <div class="ai-analysis">
+                <h4>🤖 Análise de IA (Atual)</h4>
+                <pre style="white-space: pre-wrap; font-family: monospace; font-size: 0.9rem;">${JSON.stringify(analysis, null, 2)}</pre>
+            </div>
+        `;
+    }
+
+    detailsContainer.innerHTML = `
+        <h2 style="color: #f85149; margin-bottom: 1rem;">${alert.title}</h2>
+        
+        <div style="margin-bottom: 1rem;">
+            <strong>Descrição:</strong><br>
+            ${alert.description || 'Sem descrição disponível'}
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <strong>Detalhes do Recurso:</strong><br>
+            <code style="background: rgba(45, 51, 59, 0.5); padding: 0.5rem; border-radius: 4px; display: block; margin-top: 0.5rem;">
+                ID: ${alert.resource_id}<br>
+                Tipo: ${alert.resource_type}<br>
+                Severidade: ${alert.severity}<br>
+                Status: ${alert.status}
+            </code>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <strong>Temporização:</strong><br>
+            Detectado em: ${new Date(alert.created_at).toLocaleString('pt-BR')}<br>
+            ${alert.resolved_at ? `Resolvido em: ${new Date(alert.resolved_at).toLocaleString('pt-BR')}` : 'Ainda não resolvido'}
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <button id="analyze-btn-${alert.id}" onclick="analyzeAlertWithAI(${alert.id})" 
+                    style="background: #238636; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-size: 1rem;">
+                🧠 Executar Análise Inteligente de IA
+            </button>
+        </div>
+
+        <div id="ai-analysis-result" style="margin-top: 1rem;"></div>
+
+                <div style="margin-bottom: 1rem;">
+                    <button id="analyze-btn-${alert.id}" onclick="analyzeAlert(${alert.id})" 
+                            style="background: #238636; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer;">
+                        🧠 Executar Análise de IA
+                    </button>
+                </div>
+                <div id="ai-result-${alert.id}"></div>
+
+        ${aiAnalysisHtml}
+    `;
+
+    modal.style.display = 'block';
+}
+
+async function analyzeAlertWithAI(alertId) {
+    try {
+        const button = document.getElementById(`analyze-btn-${alertId}`);
+        button.disabled = true;
+        button.textContent = '🔄 Executando análise detalhada...';
+        button.style.background = '#6c757d';
+
+        document.getElementById('ai-analysis-result').innerHTML = `
+            <div style="text-align: center; padding: 1rem; background: rgba(88, 166, 255, 0.1); border-radius: 8px;">
+                <div class="spinner"></div>
+                <p>🧠 IA analisando logs, configurações e executando diagnóstico completo...</p>
+                <p><small>Isso pode levar alguns minutos</small></p>
+            </div>
+        `;
+
+        const response = await fetch(`${API_BASE}/api/v1/alerts/${alertId}/analyze`, {
+            method: 'POST'
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            const analysis = data.analysis;
+            
+            // Formatar resultado da análise
+            let resultHtml = `
+                <div style="background: rgba(88, 166, 255, 0.1); border-left: 4px solid #58a6ff; padding: 1rem; border-radius: 8px;">
+                    <h4 style="color: #58a6ff; margin-bottom: 1rem;">🧠 Resultado da Análise Inteligente</h4>
+            `;
+
+            if (analysis.ai_analysis && !analysis.ai_analysis.startsWith('Erro')) {
+                resultHtml += `
+                    <div style="background: #0d1117; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <h5 style="color: #7dd3fc; margin-bottom: 0.5rem;">💡 Diagnóstico da IA:</h5>
+                        <div style="white-space: pre-wrap; font-family: 'Segoe UI', sans-serif; line-height: 1.5; color: #e6edf3;">
+                            ${analysis.ai_analysis}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (analysis.task_failures && analysis.task_failures.length > 0) {
+                resultHtml += `
+                    <div style="margin-bottom: 1rem;">
+                        <h5 style="color: #f85149; margin-bottom: 0.5rem;">❌ Falhas de Tasks Detectadas:</h5>
+                        ${analysis.task_failures.map(failure => `
+                            <div style="background: rgba(248, 81, 73, 0.1); padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem;">
+                                <strong>Motivo:</strong> ${failure.stopped_reason}<br>
+                                <strong>Hora:</strong> ${failure.stopped_at}<br>
+                                ${failure.containers.map(c => `<strong>Container ${c.name}:</strong> Exit code ${c.exit_code}`).join('<br>')}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            if (analysis.container_logs && analysis.container_logs.length > 0) {
+                resultHtml += `
+                    <div style="margin-bottom: 1rem;">
+                        <h5 style="color: #79c0ff; margin-bottom: 0.5rem;">📋 Logs Analisados:</h5>
+                        ${analysis.container_logs.map(log => `
+                            <div style="background: rgba(121, 192, 255, 0.1); padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem;">
+                                <strong>Container:</strong> ${log.container}<br>
+                                <strong>Log Group:</strong> ${log.log_group}<br>
+                                ${log.error ? `<span style="color: #f85149;">Erro: ${log.error}</span>` : 'Logs analisados com sucesso'}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            resultHtml += `
+                    <div style="font-size: 0.8rem; color: #7d8590; margin-top: 1rem;">
+                        <strong>Status:</strong> ${analysis.status}<br>
+                        <strong>Timestamp:</strong> ${new Date(analysis.timestamp).toLocaleString('pt-BR')}<br>
+                        <strong>Tipo de Análise:</strong> ${analysis.type}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('ai-analysis-result').innerHTML = resultHtml;
+        } else {
+            throw new Error(data.detail || 'Erro desconhecido');
+        }
+
+        button.disabled = false;
+        button.textContent = '✅ Análise Concluída';
+        button.style.background = '#28a745';
+
+    } catch (error) {
+        console.error('Erro na análise de IA:', error);
+        document.getElementById('ai-analysis-result').innerHTML = `
+            <div style="background: rgba(248, 81, 73, 0.1); border-left: 4px solid #f85149; padding: 1rem; border-radius: 8px; color: #f85149;">
+                <h4>❌ Erro na Análise</h4>
+                <p>${error.message}</p>
+            </div>
+        `;
+
+        const button = document.getElementById(`analyze-btn-${alertId}`);
+        button.disabled = false;
+        button.textContent = '🧠 Tentar Análise Novamente';
+        button.style.background = '#dc3545';
+    }
+}
+            const modal = document.getElementById('alertModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+function analyzeAlert(alertId) {
+    const btn = document.getElementById(`analyze-btn-${alertId}`);
+    const result = document.getElementById(`ai-result-${alertId}`);
+    
+    btn.disabled = true;
+    btn.textContent = "🔄 Analisando...";
+    
+    fetch(`/api/v1/alerts/${alertId}/analyze`, {method: "POST"})
+        .then(r => r.json())
+        .then(data => {
+            if (data.analysis && data.analysis.ai_analysis) {
+                result.innerHTML = `<div style="background: #0d1117; padding: 1rem; border-radius: 6px; margin-top: 1rem;"><h4 style="color: #58a6ff;">🤖 Análise de IA:</h4><pre style="white-space: pre-wrap; font-family: system-ui; color: #e6edf3; line-height: 1.5;">${data.analysis.ai_analysis}</pre></div>`;
+                btn.textContent = "✅ Concluído";
+                btn.style.background = "#28a745";
+            }
+        })
+        .catch(e => {
+            result.innerHTML = `<div style="color: #f85149; margin-top: 1rem;">❌ Erro: ${e.message}</div>`;
+            btn.textContent = "🧠 Tentar Novamente";
+            btn.disabled = false;
+        });
+}
+    </script>
+</body>
+</html>

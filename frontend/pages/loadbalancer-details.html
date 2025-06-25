@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS NOC - Detalhes do Load Balancer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            color: #e6edf3; 
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .back-btn {
+            background: #21262d;
+            color: #e6edf3;
+            border: 1px solid #30363d;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #30363d;
+            border-color: #58a6ff;
+        }
+
+        .service-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .service-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(45, 51, 59, 0.5);
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+        }
+
+        .card h2 {
+            color: #58a6ff;
+            font-size: 1.2rem;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .metric-item {
+            background: rgba(33, 38, 45, 0.5);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #58a6ff;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #7d8590;
+        }
+
+        .logs-container {
+            max-height: 400px;
+            overflow-y: auto;
+            background: rgba(33, 38, 45, 0.5);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .log-entry {
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            background: rgba(45, 51, 59, 0.3);
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            border-left: 3px solid #58a6ff;
+        }
+
+        .loading {
+            text-align: center;
+            color: #7d8590;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 3px solid #30363d;
+            border-top: 3px solid #58a6ff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: rgba(248, 81, 73, 0.1);
+            border: 1px solid #f85149;
+            border-radius: 8px;
+            padding: 1rem;
+            color: #f85149;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="javascript:history.back()" class="back-btn">← Voltar</a>
+        <h1>⚖️ Load Balancer - Detalhes e Métricas</h1>
+        <div></div>
+    </div>
+
+    <div class="service-header">
+        <div class="service-icon">⚖️</div>
+        <h1>Amazon Load Balancer</h1>
+        <p>Monitoramento de instâncias de balanceadores de carga</p>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">📊</span>
+                <h2>Métricas em Tempo Real</h2>
+            </div>
+            <div id="metrics-container">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Carregando métricas...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">📜</span>
+                <h2>Logs Recentes</h2>
+            </div>
+            <div id="logs-container">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Carregando logs...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const accountId = new URLSearchParams(window.location.search).get("account");
+        const API_BASE = window.location.origin;
+
+        async function fetchMetrics() {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/loadbalancer/${accountId}/metrics`);
+                const data = await response.json();
+                
+                const container = document.getElementById("metrics-container");
+                container.innerHTML = `
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <div class="metric-value">${data.metrics.healthy_targets}</div>
+                            <div class="metric-label">Targets Saudáveis</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value">${data.metrics.requests_per_minute}</div>
+                            <div class="metric-label">Req/Min</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value">${data.metrics.response_time.toString()}</div>
+                            <div class="metric-label">Tempo Resposta</div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById("metrics-container").innerHTML = `
+                    <div class="error">
+                        <p>❌ Erro ao carregar métricas</p>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function fetchLogs() {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/loadbalancer/${accountId}/logs`);
+                const data = await response.json();
+                
+                const container = document.getElementById("logs-container");
+                container.innerHTML = `
+                    <div class="logs-container">
+                        ${data.logs.map(log => `
+                            <div class="log-entry">${log}</div>
+                        `).join("")}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById("logs-container").innerHTML = `
+                    <div class="error">
+                        <p>❌ Erro ao carregar logs</p>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Carregar dados quando a página for carregada
+        if (accountId) {
+            fetchMetrics();
+            fetchLogs();
+            // Auto-refresh a cada 10 segundos
+            setInterval(() => {
+                fetchMetrics();
+                fetchLogs();
+            }, 10000);
+            fetchLogs();
+        } else {
+            document.body.innerHTML = `
+                <div class="error" style="margin: 2rem;">
+                    <p>❌ ID da conta não fornecido</p>
+                    <a href="/accounts.html" class="back-btn">Voltar para Contas</a>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

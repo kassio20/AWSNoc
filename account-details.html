@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelectNOC IA - Detalhes da Conta com Discovery - v1750624855</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #0d1117, #161b22); 
+            color: #e6edf3; 
+            font-family: 'Segoe UI', sans-serif; 
+            min-height: 100vh; 
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        .header { text-align: center; margin-bottom: 3rem; }
+        .title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(45deg, #58a6ff, #79c0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .section { background: rgba(33, 38, 45, 0.8); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; border: 1px solid #30363d; }
+        .section-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; color: #f0f6fc; }
+        
+        .alert-card { 
+            background: linear-gradient(135deg, #da3633, #f85149); 
+            border-radius: 8px; 
+            padding: 1.5rem; 
+            margin-bottom: 1rem; 
+            border-left: 4px solid #ff4444; 
+            cursor: pointer; 
+            transition: transform 0.2s; 
+        }
+        .alert-card:hover { transform: translateY(-2px); }
+        .alert-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; color: white; }
+        .alert-description { font-size: 0.9rem; margin-bottom: 1rem; color: rgba(255,255,255,0.9); }
+        .alert-meta { font-size: 0.8rem; color: rgba(255,255,255,0.7); font-family: 'Courier New', monospace; }
+        
+        .loading { text-align: center; padding: 2rem; }
+        .spinner { border: 3px solid #30363d; border-top: 3px solid #58a6ff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .refresh-btn { background: #238636; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; margin-bottom: 1rem; }
+        .refresh-btn:hover { background: #2ea043; }
+        
+        /* Novos estilos para Discovery */
+        .discovery-btn { 
+            background: linear-gradient(45deg, #fd7e14, #ff922b); 
+            color: white; 
+            border: none; 
+            padding: 0.75rem 1.5rem; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            margin: 0.5rem; 
+            font-weight: 600; 
+            font-size: 1rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .discovery-btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 12px rgba(253, 126, 20, 0.3); 
+        }
+        .discovery-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .discovery-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .discovery-stats { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 1rem; 
+            margin: 1rem 0; 
+        }
+        .stat-card { 
+            background: rgba(45, 51, 59, 0.5); 
+            padding: 1rem; 
+            border-radius: 8px; 
+            text-align: center; 
+        }
+        .stat-number { 
+            font-size: 1.8rem; 
+            font-weight: 700; 
+            color: #58a6ff; 
+        }
+        .stat-label { 
+            font-size: 0.9rem; 
+            color: #7d8590; 
+            margin-top: 0.5rem;
+        }
+        
+        .resources-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); 
+            gap: 1.5rem; 
+            margin-top: 2rem; 
+        }
+        
+        .resource-card { 
+            background: rgba(33, 38, 45, 0.9); 
+            border-radius: 12px; 
+            padding: 1.5rem; 
+            border: 1px solid #30363d; 
+            transition: transform 0.2s; 
+        }
+        .resource-card:hover { transform: translateY(-2px); }
+        
+        .resource-primary { 
+            border-left: 4px solid #58a6ff; 
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.1), rgba(33, 38, 45, 0.9)); 
+        }
+        .resource-secondary { 
+            border-left: 4px solid #7d8590; 
+            opacity: 0.8; 
+        }
+        
+        .resource-header { 
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 1rem; 
+        }
+        .resource-icon { 
+            font-size: 1.5rem; 
+            margin-right: 0.75rem; 
+        }
+        .resource-title { 
+            font-size: 1.2rem; 
+            font-weight: 600; 
+            color: #f0f6fc; 
+        }
+        .resource-count { 
+            background: #238636; 
+            color: white; 
+            padding: 0.25rem 0.75rem; 
+            border-radius: 12px; 
+            font-size: 0.8rem; 
+            margin-left: auto; 
+            font-weight: 600;
+        }
+        
+        .resource-list { 
+            list-style: none; 
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .resource-item { 
+            background: rgba(45, 51, 59, 0.5); 
+            margin: 0.5rem 0; 
+            padding: 0.75rem; 
+            border-radius: 6px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .resource-name { 
+            font-weight: 500; 
+            flex: 1;
+            margin-right: 1rem;
+        }
+        .resource-status { 
+            padding: 0.25rem 0.5rem; 
+            border-radius: 4px; 
+            font-size: 0.8rem; 
+            font-weight: 600;
+        }
+        .status-healthy { background: #238636; color: white; }
+        .status-running { background: #238636; color: white; }
+        .status-available { background: #238636; color: white; }
+        .status-warning { background: #fb8500; color: white; }
+        .status-critical { background: #da3633; color: white; }
+        .status-stopped { background: #6f42c1; color: white; }
+        .status-pending { background: #17a2b8; color: white; }
+        
+        .no-resources {
+            text-align: center;
+            padding: 2rem;
+            color: #7d8590;
+        }
+        
+        .discovery-progress {
+            background: rgba(45, 51, 59, 0.8);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            display: none;
+        }
+        
+        .progress-bar {
+            background: #30363d;
+            border-radius: 10px;
+            height: 6px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(45deg, #58a6ff, #79c0ff);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🚀 SelectNOC IA - Discovery Avançado</h1>
+            <p>Descoberta inteligente de recursos AWS com categorização automática</p>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">🚨 Alertas Ativos</h2>
+            <button class="refresh-btn" onclick="forceRefresh()">🔄 Atualizar Alertas</button>
+            <div id="alerts-container">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Carregando alertas reais...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">🔍 Discovery de Recursos AWS</h2>
+            
+            <div class="discovery-controls">
+                <button class="discovery-btn" onclick="startFullDiscovery()" id="discovery-btn">
+                    🔍 Descobrir Todos os Recursos
+                </button>
+                <button class="refresh-btn" onclick="refreshResources()">
+                    📊 Atualizar Vista
+                </button>
+            </div>
+            
+            <div class="discovery-progress" id="discovery-progress">
+                <div>Descobrindo recursos AWS...</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div id="discovery-status">Iniciando discovery...</div>
+            </div>
+            
+            <div class="discovery-stats" id="discovery-stats" style="display: none;">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-resources">0</div>
+                    <div class="stat-label">Total de Recursos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="primary-resources">0</div>
+                    <div class="stat-label">Recursos Principais</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="secondary-resources">0</div>
+                    <div class="stat-label">Recursos de Suporte</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="healthy-resources">0</div>
+                    <div class="stat-label">Recursos Saudáveis</div>
+                </div>
+            </div>
+            
+            <div class="resources-grid" id="resources-container">
+                <div class="no-resources">
+                    <h3>👆 Clique em "Descobrir Todos os Recursos" para começar</h3>
+                    <p>O sistema irá descobrir automaticamente todos os recursos AWS da sua conta e organizá-los por categoria.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.protocol + "//" + window.location.hostname + ":8000";
+        const currentAccountId = new URLSearchParams(window.location.search).get('id') || 1;
+        
+        // Recursos principais (destaque)
+        const PRIMARY_RESOURCES = [
+            'EC2_Instance', 'RDS_Instance', 'RDS_Cluster', 'ECS_Service', 'ECS_Cluster',
+            'Lambda_Function', 'Amplify_App', 'DocumentDB_Cluster', 'ElastiCache_Cluster',
+            'ElastiCache_ReplicationGroup', 'CloudFront_Distribution', 'API_Gateway'
+        ];
+        
+        // Mapeamento de ícones por tipo de recurso
+        const RESOURCE_ICONS = {
+            'EC2_Instance': '🖥️',
+            'RDS_Instance': '🗄️',
+            'RDS_Cluster': '🗄️',
+            'ECS_Service': '🐳',
+            'ECS_Cluster': '🐳',
+            'Lambda_Function': '⚡',
+            'Amplify_App': '🚀',
+            'DocumentDB_Cluster': '📄',
+            'ElastiCache_Cluster': '⚡',
+            'ElastiCache_ReplicationGroup': '⚡',
+            'SecurityGroup': '🛡️',
+            'IAM_Role': '👤',
+            'IAM_Policy': '📋',
+            'VPC': '🌐',
+            'Subnet': '🌐',
+            'LoadBalancer': '⚖️',
+            'TargetGroup': '🎯',
+            'S3_Bucket': '🪣',
+            'CloudWatch_Alarm': '⏰',
+            'Route53_HostedZone': '🌍',
+            'CloudFront_Distribution': '🌐',
+            'API_Gateway': '🚪',
+            'SQS_Queue': '📫',
+            'SNS_Topic': '📢'
+        };
+
+        // Carregar alertas na inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔄 Carregando alertas...');
+            forceRefresh();
+        });
+
+        async function forceRefresh() {
+            console.log("🔄 Botão Refresh clicado! Atualizando alertas...");
+            const container = document.getElementById('alerts-container');
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Executando verificação de saúde em tempo real...</p>
+                </div>
+            `;
+
+            try {
+                await fetch(`${API_BASE}/api/v1/alerts/force-refresh`, { method: 'GET' });
+                const response = await fetch(`${API_BASE}/api/v1/accounts/${currentAccountId}/alerts?cache_bust=${Date.now()}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayRealAlerts(data.alerts || []);
+                } else {
+                    throw new Error(data.detail || 'Erro ao carregar alertas');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao carregar alertas:', error);
+                container.innerHTML = `
+                    <div style="text-align: center; color: #f85149;">
+                        <h3>❌ Erro ao carregar alertas</h3>
+                        <p>${error.message}</p>
+                        <button class="refresh-btn" onclick="forceRefresh()">🔄 Tentar Novamente</button>
+                    </div>
+                `;
+            }
+        }
+
+        function displayRealAlerts(alerts) {
+            const container = document.getElementById('alerts-container');
+            
+            if (alerts.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #238636;">
+                        <h3>✅ Nenhum alerta encontrado</h3>
+                        <p>Todos os recursos estão funcionando normalmente</p>
+                        <p><small>Última verificação: ${new Date().toLocaleString('pt-BR')}</small></p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div style="margin-bottom: 1rem; color: #f85149;">
+                    <strong>🔴 ${alerts.length} ALERTAS DETECTADOS</strong>
+                    <br><small>Última verificação: ${new Date().toLocaleString('pt-BR')}</small>
+                </div>
+                ${alerts.map(alert => `
+                    <div class="alert-card" onclick="window.location.href=`${window.location.protocol}//${window.location.hostname}:8000/alert-analysis.html?account=${currentAccountId}&resource=${encodeURIComponent(alert.resource_id)}&type=${encodeURIComponent(alert.resource_type)}`" style="cursor: pointer;">
+                        <div class="alert-title">🚨 ${alert.title}</div>
+                        <div class="alert-description">${alert.description || 'Sem descrição disponível'}</div>
+                        <div class="alert-meta">
+                            <strong>Recurso:</strong> ${alert.resource_id}<br>
+                            <strong>Tipo:</strong> ${alert.resource_type}<br>
+                            <strong>Severidade:</strong> ${alert.severity}<br>
+                            <strong>Conta:</strong> ${alert.account_name} (${alert.aws_account_id})<br>
+                            <strong>Detectado em:</strong> ${new Date(alert.created_at).toLocaleString('pt-BR')}
+                            <br><small style="color: #79c0ff; font-weight: 600;">👆 Clique para análise detalhada</small>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        async function startFullDiscovery() {
+            console.log("🔍 Botão Discovery clicado! Iniciando descoberta...");
+            const btn = document.getElementById('discovery-btn');
+            const progress = document.getElementById('discovery-progress');
+            const progressFill = document.getElementById('progress-fill');
+            const status = document.getElementById('discovery-status');
+            
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Descobrindo...';
+            progress.style.display = 'block';
+            
+            try {
+                // Simular progresso
+                let currentProgress = 0;
+                const progressInterval = setInterval(() => {
+                    if (currentProgress < 90) {
+                        currentProgress += Math.random() * 15;
+                        progressFill.style.width = `${Math.min(currentProgress, 90)}%`;
+                        
+                        if (currentProgress < 30) {
+                            status.textContent = 'Conectando com AWS...';
+                        } else if (currentProgress < 60) {
+                            status.textContent = 'Descobrindo recursos EC2, RDS, Lambda...';
+                        } else {
+                            status.textContent = 'Categorizando recursos encontrados...';
+                        }
+                    }
+                }, 500);
+                
+                // Chamar API de discovery
+                const response = await fetch(`${API_BASE}/api/v1/discovery/enhanced`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                // Completar progresso
+                clearInterval(progressInterval);
+                progressFill.style.width = '100%';
+                status.textContent = 'Discovery concluído com sucesso!';
+                
+                if (response.ok) {
+                    // Aguardar um pouco para mostrar o progresso completo
+                    setTimeout(() => {
+                        progress.style.display = 'none';
+                        displayDiscoveryResults(data);
+                    }, 1000);
+                } else {
+                    throw new Error(data.detail || 'Erro no discovery');
+                }
+                
+            } catch (error) {
+                console.error('❌ Erro no discovery:', error);
+                status.textContent = `Erro: ${error.message}`;
+                setTimeout(() => {
+                    progress.style.display = 'none';
+                }, 2000);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🔍 Descobrir Todos os Recursos';
+            }
+        }
+
+        async function refreshResources() {
+            console.log("📊 Botão Atualizar Vista clicado! Refreshing resources...");
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/accounts/${currentAccountId}/resources`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayResources(data.resources || []);
+                }
+            } catch (error) {
+                console.error('❌ Erro ao atualizar recursos:', error);
+            }
+        }
+
+        function displayDiscoveryResults(data) {
+            console.log('📊 Resultados do discovery:', data);
+            
+            // Atualizar estatísticas
+            document.getElementById('discovery-stats').style.display = 'grid';
+            document.getElementById('total-resources').textContent = data.resources_found || 0;
+            document.getElementById('primary-resources').textContent = data.primary_resources || 0;
+            document.getElementById('secondary-resources').textContent = data.secondary_resources || 0;
+            document.getElementById('healthy-resources').textContent = data.healthy_resources || 0;
+            
+            // Buscar e exibir recursos
+            refreshResources();
+        }
+
+        function displayResources(resources) {
+            const container = document.getElementById('resources-container');
+            
+            if (!resources || resources.length === 0) {
+                container.innerHTML = `
+                    <div class="no-resources">
+                        <h3>📭 Nenhum recurso encontrado</h3>
+                        <p>Execute o discovery para encontrar recursos AWS.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Agrupar recursos por tipo
+            const groupedResources = {};
+            let totalPrimary = 0, totalSecondary = 0, totalHealthy = 0;
+            
+            resources.forEach(resource => {
+                const type = resource.resource_type;
+                if (!groupedResources[type]) {
+                    groupedResources[type] = [];
+                }
+                groupedResources[type].push(resource);
+                
+                // Contar estatísticas
+                if (PRIMARY_RESOURCES.includes(type)) {
+                    totalPrimary++;
+                } else {
+                    totalSecondary++;
+                }
+                
+                if (['running', 'available', 'healthy', 'active'].includes(resource.status?.toLowerCase())) {
+                    totalHealthy++;
+                }
+            });
+            
+            // Atualizar estatísticas
+            document.getElementById('total-resources').textContent = resources.length;
+            document.getElementById('primary-resources').textContent = totalPrimary;
+            document.getElementById('secondary-resources').textContent = totalSecondary;
+            document.getElementById('healthy-resources').textContent = totalHealthy;
+            document.getElementById('discovery-stats').style.display = 'grid';
+            
+            // Gerar HTML dos recursos
+            const resourceCards = Object.entries(groupedResources)
+                .sort(([typeA], [typeB]) => {
+                    const aPrimary = PRIMARY_RESOURCES.includes(typeA);
+                    const bPrimary = PRIMARY_RESOURCES.includes(typeB);
+                    if (aPrimary && !bPrimary) return -1;
+                    if (!aPrimary && bPrimary) return 1;
+                    return typeA.localeCompare(typeB);
+                })
+                .map(([type, typeResources]) => {
+                    const isPrimary = PRIMARY_RESOURCES.includes(type);
+                    const icon = RESOURCE_ICONS[type] || '📦';
+                    
+                    return `
+                        <div class="resource-card ${isPrimary ? 'resource-primary' : 'resource-secondary'}">
+                            <div class="resource-header">
+                                <span class="resource-icon">${icon}</span>
+                                <span class="resource-title">${type.replace(/_/g, ' ')}</span>
+                                <span class="resource-count">${typeResources.length}</span>
+                            </div>
+                            <ul class="resource-list">
+                                ${typeResources.slice(0, 10).map(resource => `
+                                    <li class="resource-item">
+                                        <div class="resource-name" title="${resource.resource_id}">
+                                            ${resource.name || resource.resource_id}
+                                        </div>
+                                        <span class="resource-status ${getStatusClass(resource.status)}">
+                                            ${resource.status || 'Unknown'}
+                                        </span>
+                                    </li>
+                                `).join('')}
+                                ${typeResources.length > 10 ? `
+                                    <li class="resource-item" style="justify-content: center; font-style: italic; color: #7d8590;">
+                                        +${typeResources.length - 10} recursos adicionais
+                                    </li>
+                                ` : ''}
+                            </ul>
+                        </div>
+                    `;
+                }).join('');
+            
+            container.innerHTML = resourceCards;
+        }
+
+        function getStatusClass(status) {
+            if (!status) return '';
+            const s = status.toLowerCase();
+            if (['running', 'available', 'healthy', 'active', 'in-service'].includes(s)) {
+                return 'status-healthy';
+            } else if (['stopped', 'stopping'].includes(s)) {
+                return 'status-stopped';
+            } else if (['pending', 'starting'].includes(s)) {
+                return 'status-pending';
+            } else if (['warning', 'degraded'].includes(s)) {
+                return 'status-warning';
+            } else {
+                return 'status-critical';
+            }
+        }
+    </script>
+</body>
+</html>

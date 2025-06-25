@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS NOC - Logs do Serviço ECS</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      
+      body { 
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+          background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+          color: #e6edf3; 
+          min-height: 100vh;
+          padding: 2rem;
+      }
+
+      .header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 2rem;
+          padding-bottom: 1rem;
+          border-bottom: 1px solid #30363d;
+      }
+
+      .back-btn {
+          background: #21262d;
+          color: #e6edf3;
+          border: 1px solid #30363d;
+          padding: 0.5rem 1rem;
+          border-radius: 6px;
+          text-decoration: none;
+          transition: all 0.3s ease;
+      }
+
+      .back-btn:hover {
+          background: #30363d;
+          border-color: #58a6ff;
+      }
+
+      .logs-container {
+          max-height: 400px;
+          overflow-y: auto;
+          background: rgba(33, 38, 45, 0.5);
+          border-radius: 8px;
+          padding: 1rem;
+      }
+
+      .log-entry {
+                // Atualizar título com nome do serviço
+                document.getElementById("service-title").textContent = `🐳 ECS - Logs: ${serviceName}`;
+
+      .log-entry.error {
+          border-left-color: #f85149;
+          background: rgba(248, 81, 73, 0.1);
+      }
+
+      .log-entry.warn {
+          border-left-color: #d29922;
+          background: rgba(219, 154, 4, 0.1);
+      }
+
+      .log-entry.info {
+          border-left-color: #3fb950;
+          background: rgba(35, 134, 54, 0.1);
+      }
+
+      .log-entry.debug {
+          border-left-color: #58a6ff;
+          background: rgba(88, 166, 255, 0.1);
+      }
+          padding: 0.5rem;
+          margin-bottom: 0.5rem;
+          background: rgba(45, 51, 59, 0.3);
+          border-radius: 4px;
+          font-family: monospace;
+          font-size: 1.1rem;
+          border-left: 3px solid #58a6ff;
+          word-wrap: break-word;
+          white-space: pre-wrap;
+      }
+
+      .loading {
+          text-align: center;
+          color: #7d8590;
+          padding: 2rem;
+      }
+
+      .spinner {
+          border: 3px solid #30363d;
+          border-top: 3px solid #58a6ff;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          animation: spin 1s linear infinite;
+          margin: 0 auto 1rem;
+      }
+
+      @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+      }
+
+      .error {
+          background: rgba(248, 81, 73, 0.1);
+          border: 1px solid #f85149;
+          border-radius: 8px;
+          padding: 1rem;
+          color: #f85149;
+          text-align: center;
+      }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="javascript:history.back()" class="back-btn">← Voltar</a>
+        <h1 id="service-title">🐳 ECS - Logs do Serviço</h1>
+        <div id="logs-last-update" style="color: #7d8590; font-size: 0.9rem; margin-top: 0.5rem;"></div>
+        <div></div>
+    </div>
+
+    <div id="logs-container">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Carregando logs...</p>
+        </div>
+    </div>
+
+    <script>
+        const accountId = new URLSearchParams(window.location.search).get("account");
+        const serviceName = new URLSearchParams(window.location.search).get("service");
+        const API_BASE = window.location.origin;
+
+        async function fetchServiceLogs() {
+                // Atualizar título com nome do serviço
+            try {
+                // Atualizar título com nome do serviço
+                document.getElementById("service-title").textContent = `🐳 ECS - Logs: ${serviceName}`;
+                const response = await fetch(`${API_BASE}/api/v1/ecs/${accountId}/service/${serviceName}/logs`);
+                const data = await response.json();
+
+                const container = document.getElementById("logs-container");
+                container.innerHTML = data.logs.map(log => {
+                    let logClass = "log-entry";
+                    if (log.includes("ERROR")) logClass += " error";
+                    else if (log.includes("WARN")) logClass += " warn";
+                    else if (log.includes("INFO")) logClass += " info";
+                    else if (log.includes("DEBUG")) logClass += " debug";
+                    
+                    return `<div class="${logClass}">${log}</div>`;
+                }).join('');
+                
+                // Atualizar timestamp dos logs
+                document.getElementById("logs-last-update").textContent = `Logs atualizados: ${new Date().toLocaleTimeString("pt-BR")}`;
+
+            } catch (error) {
+                document.getElementById("logs-container").innerHTML = `
+                    <div class="error">
+                        <p>❌ Erro ao carregar logs</p>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Carregar logs quando a página for carregada
+        if (accountId && serviceName) {
+            fetchServiceLogs();
+            // Auto-refresh dos logs a cada 5 segundos
+            setInterval(fetchServiceLogs, 5000);
+        } else {
+            document.body.innerHTML = `
+                <div class="error" style="margin: 2rem;">
+                    <p>❌ ID da conta ou nome do serviço não fornecido</p>
+                    <a href="/accounts.html" class="back-btn">Voltar para Contas</a>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

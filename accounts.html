@@ -1,0 +1,216 @@
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelectNOC IA - Contas AWS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0d1117;
+            color: #e6edf3; 
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #58a6ff, #1f6feb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            margin-bottom: 2rem;
+        }
+
+        .add-account-btn {
+            background: linear-gradient(135deg, #238636, #2ea043);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .add-account-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(35, 134, 54, 0.3);
+        }
+
+        .accounts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .account-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .account-card:hover {
+            transform: translateY(-5px);
+            border-color: #58a6ff;
+            box-shadow: 0 8px 25px rgba(88, 166, 255, 0.1);
+        }
+
+        .account-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #58a6ff;
+        }
+
+        .account-id {
+            font-size: 0.9rem;
+            color: #7d8590;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 1rem;
+        }
+
+        .account-region {
+            background: #21262d;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            border: 1px solid #30363d;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            border: 3px solid #30363d;
+            border-top: 3px solid #58a6ff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            opacity: 0.8;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #7d8590;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 SelectNOC IA</h1>
+        <p>Gerenciar suas contas AWS com análise inteligente de logs</p>
+        <button class="add-account-btn" onclick="window.location.href='/dashboard'">
+            📊 Ir para Dashboard Completo
+        </button>
+    </div>
+
+    <div id="accounts-container">
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Carregando contas...</p>
+        </div>
+
+        <div class="accounts-grid" id="accounts-grid"></div>
+
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <h3>Nenhuma conta AWS encontrada</h3>
+            <p>Use o dashboard completo para adicionar contas AWS</p>
+            <button class="add-account-btn" onclick="window.location.href='/dashboard'">
+                ➕ Ir para Dashboard
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        document.addEventListener('DOMContentLoaded', loadAccounts);
+
+        async function loadAccounts() {
+            const loading = document.getElementById('loading');
+            const grid = document.getElementById('accounts-grid');
+            const emptyState = document.getElementById('empty-state');
+
+            loading.style.display = 'block';
+            grid.innerHTML = '';
+            emptyState.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/v1/accounts');
+                const data = await response.json();
+
+                loading.style.display = 'none';
+
+                if (data.accounts && data.accounts.length > 0) {
+                    displayAccounts(data.accounts);
+                } else {
+                    emptyState.style.display = 'block';
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                console.error('Erro ao carregar contas:', error);
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; color: #da3633; padding: 2rem;">
+                        Erro ao carregar contas: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function displayAccounts(accounts) {
+            const grid = document.getElementById('accounts-grid');
+            
+            grid.innerHTML = accounts.map(account => `
+                <div class="account-card" onclick="selectAccount(${account.id})">
+                    <div class="account-name">${account.name}</div>
+                    <div class="account-id">ID: ${account.account_id}</div>
+                    <div class="account-region">${account.region}</div>
+                </div>
+            `).join('');
+        }
+
+        function selectAccount(accountId) {
+            window.location.href = `/account-details.html?id=${accountId}`;
+        }
+    </script>
+</body>
+</html>

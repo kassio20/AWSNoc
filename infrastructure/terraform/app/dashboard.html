@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelectNOC IA - Monitoramento Inteligente</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        
+        .container { 
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .last-update {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+        }
+        
+        .status-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .status-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+            border-left: 5px solid #4CAF50;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .status-card.healthy {
+            border-left-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
+        }
+        
+        .status-card.warning {
+            border-left-color: #ff9800;
+            background: rgba(255, 152, 0, 0.1);
+            animation: pulse 2s infinite;
+        }
+        
+        .status-card.critical {
+            border-left-color: #f44336;
+            background: rgba(244, 67, 54, 0.1);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+        }
+        
+        .section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .analyze-btn {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .analyze-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .alerts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1rem;
+        }
+        
+        .alert-card {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid #f44336;
+            border-radius: 8px;
+            padding: 1rem;
+            position: relative;
+        }
+        
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-type {
+            background: #f44336;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .alert-severity {
+            font-size: 1.2rem;
+        }
+        
+        .resource-info {
+            margin: 0.5rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            background: rgba(0,0,0,0.3);
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .metric-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin: 0.2rem;
+            display: inline-block;
+        }
+        
+        .analysis-content {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .analysis-item {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .analysis-resource {
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logs-section {
+            background: rgba(0,0,0,0.4);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 250px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .recommendations-section {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid #4CAF50;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        
+        .recommendation-item {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            border-left: 3px solid #4CAF50;
+        }
+        
+        .healthy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.5rem;
+        }
+        
+        .healthy-card {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid #4CAF50;
+            border-radius: 6px;
+            padding: 0.8rem;
+            text-align: center;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: #4CAF50;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .hidden { display: none !important; }
+        
+        .auto-refresh {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 20px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 SelectNOC IA - Monitoramento Inteligente</h1>
+            <div class="subtitle">Análise Automática de Infraestrutura AWS com IA</div>
+            <div id="last-update" class="last-update">Última atualização: --</div>
+            <div class="auto-refresh">
+                <span>Auto-refresh:</span>
+                <label class="switch">
+                    <input type="checkbox" id="auto-refresh-toggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Status Overview -->
+        <div class="status-overview">
+            <div id="total-resources" class="status-card healthy">
+                <h3>📊 Total de Recursos</h3>
+                <div id="total-count" style="font-size: 2rem; font-weight: bold;">--</div>
+            </div>
+            <div id="healthy-resources" class="status-card healthy">
+                <h3>✅ Recursos Saudáveis</h3>
+                <div id="healthy-count" style="font-size: 2rem; font-weight: bold;">--</div>
+            </div>
+            <div id="warning-resources" class="status-card">
+                <h3>⚠️ Alertas</h3>
+                <div id="warning-count" style="font-size: 2rem; font-weight: bold;">--</div>
+            </div>
+            <div id="critical-resources" class="status-card">
+                <h3>🚨 Críticos</h3>
+                <div id="critical-count" style="font-size: 2rem; font-weight: bold;">--</div>
+            </div>
+        </div>
+
+        <!-- Alertas de Falhas -->
+        <div id="alerts-section" class="section hidden">
+            <div class="section-header">
+                <div class="section-title">🚨 Falhas Detectadas</div>
+                <button onclick="analyzeFailures()" class="analyze-btn" id="analyze-btn">
+                    🤖 Analisar com IA
+                </button>
+            </div>
+            <div id="alerts-grid" class="alerts-grid"></div>
+        </div>
+
+        <!-- Análise de IA -->
+        <div id="analysis-section" class="section hidden">
+            <div class="section-header">
+                <div class="section-title">🤖 Análise Inteligente</div>
+                <span id="analysis-status">Processando...</span>
+            </div>
+            <div id="analysis-content" class="analysis-content"></div>
+        </div>
+
+        <!-- Recursos Saudáveis -->
+        <div id="healthy-section" class="section hidden">
+            <div class="section-header">
+                <div class="section-title">✅ Recursos Saudáveis</div>
+                <span id="healthy-resource-count">0 recursos</span>
+            </div>
+            <div id="healthy-grid" class="healthy-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://3.13.129.191:8000';
+        let autoRefreshInterval;
+        let failedResources = [];
+        
+        // Auto-refresh toggle
+        document.getElementById('auto-refresh-toggle').addEventListener('change', function() {
+            if (this.checked) {
+                startAutoRefresh();
+            } else {
+                stopAutoRefresh();
+            }
+        });
+
+        function startAutoRefresh() {
+            autoRefreshInterval = setInterval(checkResources, 30000); // 30 segundos
+        }
+
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+        }
+
+        async function checkResources() {
+            try {
+                updateLastUpdate();
+                const response = await fetch(`${API_BASE}/api/v1/accounts/1/resources`);
+                const data = await response.json();
+                
+                const resources = data.resources || [];
+                failedResources = resources.filter(resource => 
+                    resource.status.includes('unhealthy') || 
+                    resource.status.includes('0/') ||
+                    resource.status === 'stopped' ||
+                    resource.status === 'failed'
+                );
+                
+                const healthyResources = resources.filter(resource => 
+                    !failedResources.includes(resource)
+                );
+                
+                updateStatusOverview(resources.length, healthyResources.length, failedResources.length);
+                
+                if (failedResources.length > 0) {
+                    displayAlerts(failedResources);
+                } else {
+                    hideSection('alerts-section');
+                    hideSection('analysis-section');
+                }
+                
+                if (healthyResources.length > 0) {
+                    displayHealthyResources(healthyResources);
+                } else {
+                    hideSection('healthy-section');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao verificar recursos:', error);
+                updateStatusOverview(0, 0, 0, 'Erro ao conectar com a API');
+            }
+        }
+
+        function updateLastUpdate() {
+            const now = new Date();
+            document.getElementById('last-update').textContent = 
+                `Última atualização: ${now.toLocaleString('pt-BR')}`;
+        }
+
+        function updateStatusOverview(total, healthy, failed, error = null) {
+            document.getElementById('total-count').textContent = error || total;
+            document.getElementById('healthy-count').textContent = healthy;
+            document.getElementById('warning-count').textContent = failed > 0 ? failed : 0;
+            document.getElementById('critical-count').textContent = failed > 2 ? failed : 0;
+            
+            // Update card styles
+            const warningCard = document.getElementById('warning-resources');
+            const criticalCard = document.getElementById('critical-resources');
+            
+            if (failed > 0) {
+                warningCard.className = 'status-card warning';
+                if (failed > 2) {
+                    criticalCard.className = 'status-card critical';
+                } else {
+                    criticalCard.className = 'status-card';
+                }
+            } else {
+                warningCard.className = 'status-card';
+                criticalCard.className = 'status-card';
+            }
+        }
+
+        function displayAlerts(resources) {
+            const section = document.getElementById('alerts-section');
+            const grid = document.getElementById('alerts-grid');
+            
+            grid.innerHTML = resources.map(resource => `
+                <div class="alert-card">
+                    <div class="alert-header">
+                        <span class="alert-type">${resource.resource_type}</span>
+                        <span class="alert-severity">🚨</span>
+                    </div>
+                    <h4>${resource.name}</h4>
+                    <div class="resource-info">
+                        <div><strong>Status:</strong> ${resource.status}</div>
+                        <div><strong>ID:</strong> ${resource.resource_id}</div>
+                        <div><strong>Região:</strong> ${resource.region}</div>
+                        ${resource.vpc_id ? `<div><strong>VPC:</strong> ${resource.vpc_id}</div>` : ''}
+                    </div>
+                    ${Object.keys(resource.metrics || {}).length > 0 ? `
+                        <div style="margin-top: 0.5rem;">
+                            ${Object.entries(resource.metrics).map(([key, value]) => 
+                                `<span class="metric-badge">${key}: ${value}</span>`
+                            ).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+            
+            showSection('alerts-section');
+        }
+
+        function displayHealthyResources(resources) {
+            const section = document.getElementById('healthy-section');
+            const grid = document.getElementById('healthy-grid');
+            const count = document.getElementById('healthy-resource-count');
+            
+            count.textContent = `${resources.length} recursos`;
+            
+            grid.innerHTML = resources.map(resource => `
+                <div class="healthy-card">
+                    <div style="font-weight: bold; margin-bottom: 0.5rem;">${resource.name}</div>
+                    <div style="font-size: 0.8rem; opacity: 0.8;">${resource.resource_type}</div>
+                    <div style="font-size: 0.8rem; color: #4CAF50;">✅ ${resource.status}</div>
+                </div>
+            `).join('');
+            
+            showSection('healthy-section');
+        }
+
+        async function analyzeFailures() {
+            if (failedResources.length === 0) return;
+            
+            const analyzeBtn = document.getElementById('analyze-btn');
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = '🔄 Analisando...';
+            
+            showSection('analysis-section');
+            document.getElementById('analysis-status').textContent = 'Coletando logs e analisando com IA...';
+            
+            try {
+                const analysisResults = [];
+                
+                for (const resource of failedResources) {
+                    // Simular análise de logs (você pode expandir isso para buscar logs reais)
+                    const logMessage = generateSimulatedLogs(resource);
+                    
+                    const response = await fetch(`${API_BASE}/api/v1/analyze`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: logMessage,
+                            service: resource.name,
+                            resource_type: resource.resource_type,
+                            status: resource.status
+                        })
+                    });
+                    
+                    const analysis = await response.json();
+                    analysisResults.push({
+                        resource: resource,
+                        analysis: analysis
+                    });
+                }
+                
+                displayAnalysis(analysisResults);
+                
+            } catch (error) {
+                console.error('Erro na análise:', error);
+                document.getElementById('analysis-content').innerHTML = `
+                    <div style="color: #f44336;">
+                        ❌ Erro ao analisar falhas: ${error.message}
+                    </div>
+                `;
+            } finally {
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = '🤖 Analisar com IA';
+                document.getElementById('analysis-status').textContent = 'Análise concluída';
+            }
+        }
+
+        function generateSimulatedLogs(resource) {
+            const logs = {
+                'TargetGroup': `[ERROR] Target health check failed for ${resource.name}. Unhealthy targets: ${resource.metrics?.total_targets || 2}. Health check timeout after 5 seconds.`,
+                'LoadBalancer': `[WARNING] Load balancer ${resource.name} has no healthy targets in target groups.`,
+                'EC2': `[ERROR] Instance ${resource.resource_id} failed health checks. Status: ${resource.status}`,
+                'ECS': `[ERROR] ECS Service ${resource.name} has 0 running tasks. Task startup failures detected.`,
+                'RDS': `[ERROR] Database ${resource.name} connection failed. Status: ${resource.status}`
+            };
+            
+            return logs[resource.resource_type] || `[ERROR] ${resource.resource_type} ${resource.name} is in ${resource.status} state`;
+        }
+
+        function displayAnalysis(results) {
+            const content = document.getElementById('analysis-content');
+            
+            content.innerHTML = results.map(result => `
+                <div class="analysis-item">
+                    <div class="analysis-resource">
+                        🔍 ${result.resource.name} (${result.resource.resource_type})
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong>📋 Status Atual:</strong>
+                        <div class="resource-info">${result.resource.status}</div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong>📝 Logs Simulados:</strong>
+                        <div class="logs-section">${generateSimulatedLogs(result.resource)}</div>
+                    </div>
+                    
+                    <div>
+                        <strong>💡 Análise da IA:</strong>
+                        <div class="recommendations-section">
+                            ${result.analysis.recommendations ? 
+                                result.analysis.recommendations.split('\n').map(rec => 
+                                    rec.trim() ? `<div class="recommendation-item">• ${rec}</div>` : ''
+                                ).join('') :
+                                '<div class="recommendation-item">• Aguardando análise da IA...</div>'
+                            }
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showSection(sectionId) {
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+
+        function hideSection(sectionId) {
+            document.getElementById(sectionId).classList.add('hidden');
+        }
+
+        // Inicialização
+        window.onload = function() {
+            checkResources();
+            startAutoRefresh();
+        };
+    </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelectNOC IA - Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #f5f6fa;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            display: inline-block;
+            margin-right: 2rem;
+        }
+        
+        .nav {
+            display: inline-block;
+        }
+        
+        .nav button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 0.5rem 1rem;
+            margin-right: 0.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav button:hover, .nav button.active {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.5);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 1rem 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid #e1e8ed;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            border-left: 4px solid #3498db;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            margin-top: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: 0.5rem;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .table th, .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e1e8ed;
+        }
+        
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status.active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+        }
+        
+        .close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #aaa;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .log-entry {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 5px;
+        }
+        
+        .log-entry.high {
+            border-left-color: #e74c3c;
+        }
+        
+        .log-entry.critical {
+            border-left-color: #8e44ad;
+        }
+        
+        .log-entry.medium {
+            border-left-color: #f39c12;
+        }
+        
+        .log-meta {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 SelectNOC IA</h1>
+        <div class="nav">
+            <button onclick="showSection('dashboard')" class="active" id="nav-dashboard">Dashboard</button>
+            <button onclick="showSection('accounts')" id="nav-accounts">Contas AWS</button>
+            <button onclick="showSection('monitoring')" id="nav-monitoring">Monitoramento</button>
+            <button onclick="showSection('logs')" id="nav-logs">Logs Recentes</button>
+            <button onclick="showSection('settings')" id="nav-settings">Configurações</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="section active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-accounts">0</div>
+                    <div class="stat-label">Contas AWS Monitoradas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-logs">0</div>
+                    <div class="stat-label">Logs Analisados Hoje</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="critical-alerts">0</div>
+                    <div class="stat-label">Alertas Críticos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="uptime">99.9%</div>
+                    <div class="stat-label">Uptime</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🧪 Teste da IA</h2>
+                <p>Teste a análise inteligente de logs do SelectNOC IA:</p>
+                <br>
+                <button class="btn" onclick="testHealth()">Test Health</button>
+                <button class="btn" onclick="testBedrock()">Test Bedrock IA</button>
+                <button class="btn" onclick="testAnalyze()">Test Log Analysis</button>
+                <div id="test-result" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 5px; display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Accounts Section -->
+        <div id="accounts" class="section">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2>📊 Contas AWS Monitoradas</h2>
+                    <button class="btn btn-success" onclick="showAddAccountModal()">+ Adicionar Conta</button>
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nome da Conta</th>
+                            <th>Account ID</th>
+                            <th>Região</th>
+                            <th>Status</th>
+                            <th>Logs/Hora</th>
+                            <th>Última Análise</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accounts-table">
+                        <!-- Will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Monitoring Section -->
+        <div id="monitoring" class="section">
+            <div class="card">
+                <h2>🔍 Monitoramento em Tempo Real</h2>
+                <div style="margin: 2rem 0;">
+                    <button class="btn" onclick="startMonitoring()">Iniciar Monitoramento</button>
+                    <button class="btn btn-danger" onclick="stopMonitoring()">Parar Monitoramento</button>
+                    <span id="monitoring-status" style="margin-left: 1rem; font-weight: bold;">Status: Parado</span>
+                </div>
+                
+                <div id="live-logs">
+                    <!-- Live logs will appear here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs Section -->
+        <div id="logs" class="section">
+            <div class="card">
+                <h2>📋 Logs Analisados Recentemente</h2>
+                <div style="margin: 1rem 0;">
+                    <select id="severity-filter" onchange="filterLogs()">
+                        <option value="">Todas as Severidades</option>
+                        <option value="CRITICAL">Crítico</option>
+                        <option value="HIGH">Alto</option>
+                        <option value="MEDIUM">Médio</option>
+                        <option value="LOW">Baixo</option>
+                    </select>
+                </div>
+                <div id="logs-container">
+                    <!-- Logs will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settings" class="section">
+            <div class="card">
+                <h2>⚙️ Configurações do Sistema</h2>
+                
+                <div class="form-group">
+                    <label>Região AWS Padrão</label>
+                    <select>
+                        <option value="us-east-2" selected>US East (Ohio)</option>
+                        <option value="us-east-1">US East (N. Virginia)</option>
+                        <option value="us-west-2">US West (Oregon)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Intervalo de Análise (minutos)</label>
+                    <input type="number" value="5" min="1" max="60">
+                </div>
+
+                <div class="form-group">
+                    <label>Threshold de Alertas Críticos</label>
+                    <input type="number" value="10" min="1" max="100">
+                </div>
+
+                <div class="form-group">
+                    <label>Email para Notificações</label>
+                    <input type="email" placeholder="admin@empresa.com">
+                </div>
+
+                <button class="btn btn-success">Salvar Configurações</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Account Modal -->
+    <div id="addAccountModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddAccountModal()">&times;</span>
+            <h2>Adicionar Nova Conta AWS</h2>
+            
+            <form id="addAccountForm">
+                <div class="form-group">
+                    <label>Nome da Conta</label>
+                    <input type="text" id="account-name" required placeholder="Ex: Produção, Desenvolvimento">
+                </div>
+
+                <div class="form-group">
+                    <label>AWS Account ID</label>
+                    <input type="text" id="account-id" required placeholder="123456789012">
+                </div>
+
+                <div class="form-group">
+                    <label>Região</label>
+                    <select id="account-region" required>
+                        <option value="us-east-2">US East (Ohio)</option>
+                        <option value="us-east-1">US East (N. Virginia)</option>
+                        <option value="us-west-2">US West (Oregon)</option>
+                        <option value="eu-west-1">Europe (Ireland)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Access Key ID</label>
+                    <input type="text" id="access-key" required placeholder="AKIA...">
+                </div>
+
+                <div class="form-group">
+                    <label>Secret Access Key</label>
+                    <input type="password" id="secret-key" required placeholder="...">
+                </div>
+
+                <div class="form-group">
+                    <label>Serviços para Monitorar</label>
+                    <div style="margin-top: 0.5rem;">
+                        <label><input type="checkbox" checked> CloudWatch Logs</label><br>
+                        <label><input type="checkbox" checked> EC2</label><br>
+                        <label><input type="checkbox" checked> RDS</label><br>
+                        <label><input type="checkbox"> ELB</label><br>
+                        <label><input type="checkbox"> Lambda</label>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <button type="submit" class="btn btn-success">Adicionar Conta</button>
+                    <button type="button" class="btn" onclick="closeAddAccountModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        let monitoringInterval;
+        let accounts = [];
+        let logs = [];
+
+        // Navigation
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.nav button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName).classList.add('active');
+            document.getElementById(`nav-${sectionName}`).classList.add('active');
+            
+            // Load section-specific data
+            if (sectionName === 'accounts') loadAccounts();
+            if (sectionName === 'logs') loadLogs();
+        }
+
+        // Test functions
+        async function testHealth() {
+            showTestResult('🔄 Testando health check...', 'loading');
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                showTestResult(`✅ Health Check:\n${JSON.stringify(data, null, 2)}`, 'success');
+            } catch (error) {
+                showTestResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testBedrock() {
+            showTestResult('🤖 Testando Amazon Bedrock IA...', 'loading');
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/test/bedrock`);
+                const data = await response.json();
+                showTestResult(`✅ Bedrock IA:\n${JSON.stringify(data, null, 2)}`, 'success');
+            } catch (error) {
+                showTestResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAnalyze() {
+            showTestResult('🔍 Testando análise de logs...', 'loading');
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: 'CRITICAL: Database connection pool exhausted - 500 connections failed',
+                        service: 'payment-api'
+                    })
+                });
+                const data = await response.json();
+                showTestResult(`📊 Análise IA:\n${JSON.stringify(data, null, 2)}`, 'success');
+            } catch (error) {
+                showTestResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function showTestResult(text, type = '') {
+            const result = document.getElementById('test-result');
+            result.textContent = text;
+            result.style.display = 'block';
+            result.className = `test-result ${type}`;
+        }
+
+        // Account management
+        function showAddAccountModal() {
+            document.getElementById('addAccountModal').style.display = 'block';
+        }
+
+        function closeAddAccountModal() {
+            document.getElementById('addAccountModal').style.display = 'none';
+            document.getElementById('addAccountForm').reset();
+        }
+
+        document.getElementById('addAccountForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const account = {
+                id: Date.now(),
+                name: document.getElementById('account-name').value,
+                accountId: document.getElementById('account-id').value,
+                region: document.getElementById('account-region').value,
+                accessKey: document.getElementById('access-key').value,
+                secretKey: document.getElementById('secret-key').value,
+                status: 'active',
+                logsPerHour: Math.floor(Math.random() * 1000) + 100,
+                lastAnalysis: new Date().toLocaleString()
+            };
+            
+            accounts.push(account);
+            localStorage.setItem('selectnoc_accounts', JSON.stringify(accounts));
+            
+            loadAccounts();
+            closeAddAccountModal();
+            updateStats();
+            
+            alert('Conta AWS adicionada com sucesso!');
+        });
+
+        function loadAccounts() {
+            const stored = localStorage.getItem('selectnoc_accounts');
+            if (stored) {
+                accounts = JSON.parse(stored);
+            }
+            
+            const tbody = document.getElementById('accounts-table');
+            tbody.innerHTML = '';
+            
+            accounts.forEach(account => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${account.name}</td>
+                    <td>${account.accountId}</td>
+                    <td>${account.region}</td>
+                    <td><span class="status ${account.status}">${account.status === 'active' ? 'Ativo' : 'Inativo'}</span></td>
+                    <td>${account.logsPerHour}</td>
+                    <td>${account.lastAnalysis}</td>
+                    <td>
+                        <button class="btn" onclick="editAccount(${account.id})">Editar</button>
+                        <button class="btn btn-danger" onclick="deleteAccount(${account.id})">Excluir</button>
+                    </td>
+                `;
+            });
+        }
+
+        function deleteAccount(id) {
+            if (confirm('Tem certeza que deseja excluir esta conta?')) {
+                accounts = accounts.filter(acc => acc.id !== id);
+                localStorage.setItem('selectnoc_accounts', JSON.stringify(accounts));
+                loadAccounts();
+                updateStats();
+            }
+        }
+
+        // Monitoring
+        function startMonitoring() {
+            document.getElementById('monitoring-status').textContent = 'Status: Ativo';
+            document.getElementById('monitoring-status').style.color = '#27ae60';
+            
+            monitoringInterval = setInterval(() => {
+                addLiveLog();
+            }, 3000);
+        }
+
+        function stopMonitoring() {
+            document.getElementById('monitoring-status').textContent = 'Status: Parado';
+            document.getElementById('monitoring-status').style.color = '#e74c3c';
+            
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+            }
+        }
+
+        function addLiveLog() {
+            const severities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+            const services = ['web-server', 'database', 'auth-service', 'payment-api', 'load-balancer'];
+            const messages = [
+                'Connection established successfully',
+                'WARNING: High memory usage detected',
+                'ERROR: Database timeout',
+                'CRITICAL: Service unavailable',
+                'INFO: User authentication successful'
+            ];
+            
+            const severity = severities[Math.floor(Math.random() * severities.length)];
+            const service = services[Math.floor(Math.random() * services.length)];
+            const message = messages[Math.floor(Math.random() * messages.length)];
+            
+            const logEntry = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleString(),
+                severity: severity,
+                service: service,
+                message: message,
+                account: accounts.length > 0 ? accounts[0].name : 'Demo Account'
+            };
+            
+            logs.unshift(logEntry);
+            if (logs.length > 50) logs.pop();
+            
+            const liveLogsContainer = document.getElementById('live-logs');
+            const logDiv = document.createElement('div');
+            logDiv.className = `log-entry ${severity.toLowerCase()}`;
+            logDiv.innerHTML = `
+                <div class="log-meta">${logEntry.timestamp} - ${logEntry.account} - ${logEntry.service}</div>
+                <div><strong>${severity}:</strong> ${message}</div>
+            `;
+            
+            liveLogsContainer.insertBefore(logDiv, liveLogsContainer.firstChild);
+            
+            // Keep only last 10 logs visible
+            while (liveLogsContainer.children.length > 10) {
+                liveLogsContainer.removeChild(liveLogsContainer.lastChild);
+            }
+        }
+
+        function loadLogs() {
+            const container = document.getElementById('logs-container');
+            container.innerHTML = '';
+            
+            logs.forEach(log => {
+                const logDiv = document.createElement('div');
+                logDiv.className = `log-entry ${log.severity.toLowerCase()}`;
+                logDiv.innerHTML = `
+                    <div class="log-meta">${log.timestamp} - ${log.account} - ${log.service}</div>
+                    <div><strong>${log.severity}:</strong> ${log.message}</div>
+                `;
+                container.appendChild(logDiv);
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('total-accounts').textContent = accounts.length;
+            document.getElementById('total-logs').textContent = logs.length;
+            document.getElementById('critical-alerts').textContent = logs.filter(log => log.severity === 'CRITICAL').length;
+        }
+
+        // Initialize
+        window.onload = function() {
+            loadAccounts();
+            updateStats();
+            
+            // Add some demo logs
+            if (logs.length === 0) {
+                for (let i = 0; i < 5; i++) {
+                    addLiveLog();
+                }
+            }
+        };
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('addAccountModal');
+            if (event.target === modal) {
+                closeAddAccountModal();
+            }
+        };
+    </script>
+</body>
+</html>
+

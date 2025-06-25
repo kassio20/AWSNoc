@@ -1,0 +1,409 @@
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SelectNOC IA - Análise de Alerta</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0d1117;
+            color: #e6edf3; 
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn {
+            background: #21262d;
+            color: #e6edf3;
+            border: 1px solid #30363d;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #30363d;
+            color: #58a6ff;
+        }
+
+        .alert-header {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .alert-title {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #e6edf3;
+        }
+
+        .analysis-section {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #e6edf3;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, #238636, #2ea043);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(35, 134, 54, 0.3);
+        }
+
+        .analyze-btn:disabled {
+            background: #30363d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .analysis-status {
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .status-loading {
+            border-left: 4px solid #58a6ff;
+        }
+
+        .spinner {
+            border: 3px solid #30363d;
+            border-top: 3px solid #58a6ff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .analysis-results {
+            display: none;
+        }
+
+        .result-section {
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .result-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #58a6ff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logs-content {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            white-space: pre-wrap;
+        }
+
+        .recommendations {
+            background: rgba(35, 134, 54, 0.1);
+            border: 1px solid #238636;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .recommendation-item {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            border-left: 3px solid #58a6ff;
+        }
+
+        .recommendation-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #58a6ff;
+        }
+
+        .root-cause {
+            background: rgba(255, 152, 0, 0.1);
+            border: 1px solid #ff9800;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .cause-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ff9800;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .confidence-badge {
+            background: #1f6feb;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="#" onclick="goBack()" class="back-btn">← Voltar</a>
+        <h1>🤖 Análise Inteligente de Alerta</h1>
+    </div>
+
+    <div id="alert-info" class="alert-header">
+        <div class="analysis-status status-loading">
+            <div class="spinner"></div>
+            <p>Carregando informações do alerta...</p>
+        </div>
+    </div>
+
+    <div class="analysis-section">
+        <h2 class="section-title">🔍 Análise com IA (Amazon Bedrock + Claude-3)</h2>
+        
+        <button id="analyze-btn" class="analyze-btn" onclick="startAnalysis()">
+            🤖 Iniciar Análise Inteligente
+        </button>
+
+        <div id="analysis-status" class="analysis-status" style="display: none;">
+            <div class="spinner"></div>
+            <p id="status-text">Iniciando análise...</p>
+        </div>
+
+        <div id="analysis-results" class="analysis-results">
+            <div class="result-section">
+                <div class="result-title">🔎 Causa Raiz Identificada</div>
+                <div id="root-cause-content" class="root-cause"></div>
+            </div>
+
+            <div class="result-section">
+                <div class="result-title">📄 Logs Analisados</div>
+                <div id="logs-content" class="logs-content"></div>
+            </div>
+
+            <div class="result-section">
+                <div class="result-title">💡 Recomendações de Correção</div>
+                <div id="recommendations-content" class="recommendations"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        let currentAlertId = null;
+        let currentAccountId = null;
+        let alertData = null;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        currentAlertId = urlParams.get('id');
+        currentAccountId = urlParams.get('account');
+
+            alert('Parâmetros do alerta não fornecidos');
+            goBack();
+        }
+
+        document.addEventListener('DOMContentLoaded', loadAlertInfo);
+
+        function goBack() {
+            window.location.href = `${window.location.protocol}//${window.location.hostname}:8000/account-details.html?id=${currentAccountId}`;
+        }
+
+        async function loadAlertInfo() {
+            try {
+                const alertResponse = await fetch(`/api/v1/accounts/${currentAccountId}/alerts`);
+                const alertsData = await alertResponse.json();
+                
+                if (alertResponse.ok && alertsData.alerts) {
+                    alertData = alertsData.alerts.find(alert => alert.id == currentAlertId);
+                    
+                    if (alertData) {
+                        displayAlertInfo(alertData);
+                    } else {
+                        throw new Error('Alerta não encontrado');
+                    }
+                } else {
+                    throw new Error('Erro ao carregar alertas');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar alerta:', error);
+                document.getElementById('alert-info').innerHTML = `
+                    <div style="text-align: center; color: #da3633;">
+                        Erro ao carregar informações do alerta: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function displayAlertInfo(alert) {
+            document.getElementById('alert-info').innerHTML = `
+                <div class="alert-title">${alert.title}</div>
+                <p style="color: #7d8590; margin-bottom: 1rem;">${alert.description || 'Sem descrição disponível'}</p>
+                <div style="font-family: 'Courier New', monospace; color: #58a6ff;">
+                    Recurso: ${alert.resource_id} (${alert.resource_type})
+                </div>
+            `;
+        }
+
+        async function startAnalysis() {
+            const analyzeBtn = document.getElementById('analyze-btn');
+            const statusDiv = document.getElementById('analysis-status');
+            const statusText = document.getElementById('status-text');
+            const resultsDiv = document.getElementById('analysis-results');
+
+            analyzeBtn.disabled = true;
+            statusDiv.style.display = 'block';
+            resultsDiv.style.display = 'none';
+
+            try {
+                statusText.textContent = '🔍 Coletando logs do recurso...';
+                await sleep(1500);
+
+                statusText.textContent = '🤖 Analisando com Amazon Bedrock (Claude-3)...';
+                await sleep(2000);
+
+                // Simular análise IA com dados mock
+                const analysisData = generateMockAnalysis();
+
+                statusText.textContent = '📊 Processando resultados da análise...';
+                await sleep(1000);
+
+                statusDiv.style.display = 'none';
+                displayAnalysisResults(analysisData);
+                resultsDiv.style.display = 'block';
+
+            } catch (error) {
+                console.error('Erro na análise:', error);
+                statusDiv.innerHTML = `<p style="color: #da3633;">❌ Erro na análise: ${error.message}</p>`;
+            } finally {
+                analyzeBtn.disabled = false;
+            }
+        }
+
+        function displayAnalysisResults(analysis) {
+            document.getElementById('root-cause-content').innerHTML = `
+                <div class="cause-title">
+                    🎯 ${analysis.root_cause.title}
+                    <span class="confidence-badge">${analysis.root_cause.confidence}% confiança</span>
+                </div>
+                <p>${analysis.root_cause.description}</p>
+            `;
+
+            document.getElementById('logs-content').textContent = analysis.logs_analyzed.join('\n');
+
+            document.getElementById('recommendations-content').innerHTML = 
+                analysis.recommendations.map(rec => `
+                    <div class="recommendation-item">
+                        <div class="recommendation-title">${rec.title}</div>
+                        <div>${rec.description}</div>
+                        ${rec.commands ? `<div class="logs-content" style="margin-top: 0.5rem;">${rec.commands.join('\n')}</div>` : ''}
+                    </div>
+                `).join('');
+        }
+
+        function generateMockAnalysis() {
+            const mockAnalyses = {
+                'EC2': {
+                    root_cause: {
+                        title: "Alto uso de CPU detectado na instância EC2",
+                        description: "Análise indica processo Java consumindo recursos excessivos, possivelmente em loop infinito ou deadlock.",
+                        confidence: 87
+                    },
+                    logs_analyzed: [
+                        "[2024-01-19 14:30:21] WARNING: CPU usage above 90% for 15 minutes",
+                        "[2024-01-19 14:30:22] ERROR: Process java (PID 1234) consuming 95% CPU",
+                        "[2024-01-19 14:30:23] INFO: Memory usage at 78%",
+                        "[2024-01-19 14:30:24] ERROR: Application response time increased to 45s"
+                    ],
+                    recommendations: [
+                        {
+                            title: "1. Reiniciar processo problemático",
+                            description: "Identifique e reinicie o processo que está causando alto uso de CPU.",
+                            commands: ["sudo top -p 1234", "sudo kill -9 1234"]
+                        },
+                        {
+                            title: "2. Investigar logs da aplicação",
+                            description: "Analise logs para identificar causa raiz do problema."
+                        },
+                        {
+                            title: "3. Configurar monitoramento preventivo",
+                            description: "Implemente alertas mais sensíveis para detecção precoce."
+                        }
+                    ]
+                }
+            };
+
+            const resourceType = alertData?.resource_type || 'EC2';
+            return mockAnalyses[resourceType] || mockAnalyses['EC2'];
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>
