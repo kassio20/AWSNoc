@@ -1,5 +1,5 @@
 """
-SelectNOC IA - Real CloudWatch Alarms Service
+AWSNoc IA IA - Real CloudWatch Alarms Service
 Serviço para descoberta e análise de alarmes reais
 """
 from typing import List, Dict, Any, Optional

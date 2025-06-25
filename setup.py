@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SelectNOC IA - Setup Script
+AWSNoc IA IA - Setup Script
 Script de configuração inicial do projeto
 """
 
@@ -27,7 +27,7 @@ def create_directory_structure():
 
 def create_environment_file():
     """Cria arquivo .env de exemplo"""
-    env_content = """# SelectNOC IA Environment Variables
+    env_content = """# AWSNoc IA IA Environment Variables
 
 # AWS Configuration
 AWS_DEFAULT_REGION=us-east-1
@@ -41,7 +41,7 @@ BEDROCK_REGION=us-east-1
 # OPENAI_API_KEY=your_openai_key_here
 
 # Database
-DATABASE_URL=postgresql://selectnoc:password@localhost:5432/selectnoc_ia
+DATABASE_URL=postgresql://awsnoc-ia:password@localhost:5432/awsnoc-ia_ia
 REDIS_URL=redis://localhost:6379/0
 
 # Security
@@ -139,12 +139,12 @@ def create_systemd_service():
     python_path = sys.executable
     
     service_content = f"""[Unit]
-Description=SelectNOC IA - Intelligent AWS Log Analysis
+Description=AWSNoc IA IA - Intelligent AWS Log Analysis
 After=network.target
 
 [Service]
 Type=simple
-User=selectnoc
+User=awsnoc-ia
 WorkingDirectory={current_dir}
 Environment=PATH={current_dir}/venv/bin
 ExecStart={python_path} main.py --host 0.0.0.0 --port 8000
@@ -155,18 +155,18 @@ RestartSec=5
 WantedBy=multi-user.target
 """
     
-    service_file = "selectnoc-ia.service"
+    service_file = "awsnoc-ia-ia.service"
     with open(service_file, "w") as f:
         f.write(service_content)
     
     print(f"✓ Arquivo de serviço criado: {service_file}")
-    print("Para instalar: sudo cp selectnoc-ia.service /etc/systemd/system/")
+    print("Para instalar: sudo cp awsnoc-ia-ia.service /etc/systemd/system/")
 
 def create_nginx_config():
     """Cria configuração nginx de exemplo"""
     nginx_config = """server {
     listen 80;
-    server_name selectnoc.yourdomain.com;
+    server_name awsnoc-ia.yourdomain.com;
     
     # Redirect to HTTPS
     return 301 https://$server_name$request_uri;
@@ -174,7 +174,7 @@ def create_nginx_config():
 
 server {
     listen 443 ssl http2;
-    server_name selectnoc.yourdomain.com;
+    server_name awsnoc-ia.yourdomain.com;
     
     # SSL Configuration
     ssl_certificate /path/to/ssl/cert.pem;
@@ -201,17 +201,17 @@ server {
     
     # Static files (if any)
     location /static/ {
-        alias /path/to/selectnoc/static/;
+        alias /path/to/awsnoc-ia/static/;
         expires 1y;
         add_header Cache-Control "public, immutable";
     }
 }
 """
     
-    with open("nginx-selectnoc.conf", "w") as f:
+    with open("nginx-awsnoc-ia.conf", "w") as f:
         f.write(nginx_config)
     
-    print("✓ Configuração nginx criada: nginx-selectnoc.conf")
+    print("✓ Configuração nginx criada: nginx-awsnoc-ia.conf")
 
 def run_tests():
     """Executa testes básicos"""
@@ -237,7 +237,7 @@ def run_tests():
 
 def main():
     """Função principal do setup"""
-    print("🚀 SelectNOC IA - Setup Inicial")
+    print("🚀 AWSNoc IA IA - Setup Inicial")
     print("=" * 50)
     
     # Verificar Python

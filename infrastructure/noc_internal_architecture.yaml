@@ -1,4 +1,4 @@
-# SelectNOC IA - Ferramenta Interna para NOC
+# AWSNoc IA IA - Ferramenta Interna para NOC
 # Sistema para sua empresa gerenciar contas AWS de múltiplos clientes
 
 # Visão Geral da Arquitetura
@@ -315,7 +315,7 @@ deployment:
   infrastructure:
     compute:
       ecs_fargate:
-        cluster: "noc-selectnoc-cluster"
+        cluster: "noc-awsnoc-ia-cluster"
         services:
           - "noc-api-service"
           - "noc-collector-service"
@@ -328,9 +328,9 @@ deployment:
         encrypted: true
         
       s3_buckets:
-        - "noc-selectnoc-logs"
-        - "noc-selectnoc-backups"
-        - "noc-selectnoc-frontend"
+        - "noc-awsnoc-ia-logs"
+        - "noc-awsnoc-ia-backups"
+        - "noc-awsnoc-ia-frontend"
         
     networking:
       vpc: "NOC dedicated VPC"

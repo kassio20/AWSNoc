@@ -98,7 +98,7 @@ f"/aws/fargate/{service_name}"
 A IA agora deve responder algo como:
 
 > **🎯 SERVIÇO IDENTIFICADO:**
-> - Nome do serviço ECS: selectnocia-unhealthy-app-service
+> - Nome do serviço ECS: awsnoc-iaia-unhealthy-app-service
 > - Task ID que falhou: d329d8f1b66d4d508c4a372eaec18934
 > - Exit code: 1
 > 
@@ -114,7 +114,7 @@ A IA agora deve responder algo como:
 ## 🔧 **IMPLEMENTAÇÃO**
 
 ### **Arquivos Modificados:**
-- ✅ `/opt/selectnoc/simple_main.py` - Função principal melhorada
+- ✅ `/opt/awsnoc-ia/simple_main.py` - Função principal melhorada
 - ✅ `get_specific_task_logs()` - Nova função para captura específica
 - ✅ `get_dynamic_log_groups_from_task_definition()` - Descoberta dinâmica
 - ✅ Contexto e prompt da IA otimizados

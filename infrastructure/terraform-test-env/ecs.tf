@@ -1,6 +1,6 @@
 # ECS Cluster
 resource "aws_ecs_cluster" "test_cluster" {
-  name = "selectnocia-test-cluster"
+  name = "awsnoc-iaia-test-cluster"
 
   setting {
     name  = "containerInsights"
@@ -8,13 +8,13 @@ resource "aws_ecs_cluster" "test_cluster" {
   }
 
   tags = {
-    Name = "selectnocia-test-cluster"
+    Name = "awsnoc-iaia-test-cluster"
   }
 }
 
 # ECS Task Execution Role
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "selectnocia-test-ecs-task-execution-role"
+  name = "awsnoc-iaia-test-ecs-task-execution-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -37,7 +37,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
 
 # ECS Task Role (for CloudWatch logs)
 resource "aws_iam_role" "ecs_task_role" {
-  name = "selectnocia-test-ecs-task-role"
+  name = "awsnoc-iaia-test-ecs-task-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -55,17 +55,17 @@ resource "aws_iam_role" "ecs_task_role" {
 
 # CloudWatch Log Group
 resource "aws_cloudwatch_log_group" "ecs_log_group" {
-  name              = "/ecs/selectnocia-test"
+  name              = "/ecs/awsnoc-iaia-test"
   retention_in_days = 7
 
   tags = {
-    Name = "selectnocia-test-log-group"
+    Name = "awsnoc-iaia-test-log-group"
   }
 }
 
 # Task Definition for Hello World App
 resource "aws_ecs_task_definition" "hello_world_task" {
-  family                   = "selectnocia-hello-world"
+  family                   = "awsnoc-iaia-hello-world"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
@@ -103,13 +103,13 @@ resource "aws_ecs_task_definition" "hello_world_task" {
   ])
 
   tags = {
-    Name = "selectnocia-hello-world-task"
+    Name = "awsnoc-iaia-hello-world-task"
   }
 }
 
 # Task Definition for Node.js Hello World App
 resource "aws_ecs_task_definition" "nodejs_hello_world_task" {
-  family                   = "selectnocia-nodejs-hello-world"
+  family                   = "awsnoc-iaia-nodejs-hello-world"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
@@ -147,13 +147,13 @@ resource "aws_ecs_task_definition" "nodejs_hello_world_task" {
   ])
 
   tags = {
-    Name = "selectnocia-nodejs-hello-world-task"
+    Name = "awsnoc-iaia-nodejs-hello-world-task"
   }
 }
 
 # Task Definition for Unhealthy App (for failure simulation)
 resource "aws_ecs_task_definition" "unhealthy_app_task" {
-  family                   = "selectnocia-unhealthy-app"
+  family                   = "awsnoc-iaia-unhealthy-app"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
@@ -192,7 +192,7 @@ resource "aws_ecs_task_definition" "unhealthy_app_task" {
   ])
 
   tags = {
-    Name = "selectnocia-unhealthy-app-task"
+    Name = "awsnoc-iaia-unhealthy-app-task"
   }
 }
 

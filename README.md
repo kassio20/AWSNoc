@@ -1,8 +1,8 @@
-# 🚀 SelectNOC - AWS Network Operations Center
+# 🚀 AWSNoc IA - AWS Network Operations Center
 
 ## 📋 Descrição
 
-O **SelectNOC** é uma solução completa de monitoramento e análise inteligente para infraestrutura AWS, desenvolvida para oferecer visibilidade em tempo real, alertas proativos e análises automatizadas com inteligência artificial.
+O **AWSNoc IA** é uma solução completa de monitoramento e análise inteligente para infraestrutura AWS, desenvolvida para oferecer visibilidade em tempo real, alertas proativos e análises automatizadas com inteligência artificial.
 
 ## ✨ Principais Funcionalidades
 
@@ -214,17 +214,17 @@ ALERT_THRESHOLDS = {
 ### 2. **Configuração do Serviço**
 ```bash
 # Criar serviço systemd
-sudo nano /etc/systemd/system/selectnoc.service
+sudo nano /etc/systemd/system/awsnoc-ia.service
 
 [Unit]
-Description=SelectNOC IA Application
+Description=AWSNoc IA IA Application
 After=network.target
 
 [Service]
 Type=simple
 User=ubuntu
-WorkingDirectory=/opt/selectnoc
-ExecStart=/opt/selectnoc/venv/bin/python simple_main.py
+WorkingDirectory=/opt/awsnoc-ia
+ExecStart=/opt/awsnoc-ia/venv/bin/python simple_main.py
 Restart=always
 
 [Install]
@@ -253,7 +253,7 @@ WantedBy=multi-user.target
 ### Logs da Aplicação
 ```bash
 # Visualizar logs do serviço
-sudo journalctl -u selectnoc -f
+sudo journalctl -u awsnoc-ia -f
 
 # Logs do nginx
 sudo tail -f /var/log/nginx/access.log

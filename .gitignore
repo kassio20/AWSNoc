@@ -37,7 +37,7 @@ dashboard-*.html
 # Banco de dados
 *.db
 *.db.*
-selectnoc.db*
+awsnoc-ia.db*
 
 # Arquivos de sistema
 __pycache__/

@@ -15,7 +15,7 @@ Implementação completa de análise inteligente para Target Groups com descober
 
 **Exemplo de Resultado:**
 ```
-✅ Serviço ECS descoberto: selectnocia-unhealthy-app-service
+✅ Serviço ECS descoberto: awsnoc-iaia-unhealthy-app-service
 📊 Status: 0/1 containers rodando
 ❌ Falhas: 3 tasks com exit code 1
 📋 Logs: 15 entradas capturadas
@@ -81,13 +81,13 @@ system_output = command_result.get('StandardOutput', 'No output')  # ✅ Seguro
 
 ## 📊 Resultados Alcançados
 
-### **Target Group ECS (selectnocia-unhealthy-app-tg)**
-- ✅ Descobriu serviço ECS `selectnocia-unhealthy-app-service`
+### **Target Group ECS (awsnoc-iaia-unhealthy-app-tg)**
+- ✅ Descobriu serviço ECS `awsnoc-iaia-unhealthy-app-service`
 - ✅ Capturou 15 logs de erros npm dos containers
 - ✅ IA identificou causa raiz: "npm ERR! Tracker 'idealTree' already exists"
 - ✅ Forneceu solução específica para corrigir package.json
 
-### **Target Group EC2 (selectnocia-ec2-unhealthy-tg)**
+### **Target Group EC2 (awsnoc-iaia-ec2-unhealthy-tg)**
 - ✅ Descobriu instância EC2 `i-0d1bc79d7c678c3f7`
 - ✅ Conectou via SSM e executou diagnósticos
 - ✅ Identificou problema: nenhum serviço na porta 3000
@@ -151,7 +151,7 @@ Análise IA Integrada ECS  Análise IA Integrada EC2
 
 ---
 
-**Desenvolvido por:** Sistema SelectNOC IA  
+**Desenvolvido por:** Sistema AWSNoc IA IA  
 **Versão:** 2.0 - Target Group Intelligence  
 **Status:** ✅ Implementado e Testado  
 **Commit:** cbfe84b - Análise Inteligente de Target Group com Integração ECS & EC2

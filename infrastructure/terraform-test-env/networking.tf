@@ -10,7 +10,7 @@ resource "aws_vpc" "test_vpc" {
   enable_dns_support   = true
 
   tags = {
-    Name = "selectnocia-test-vpc"
+    Name = "awsnoc-iaia-test-vpc"
   }
 }
 
@@ -19,7 +19,7 @@ resource "aws_internet_gateway" "test_igw" {
   vpc_id = aws_vpc.test_vpc.id
 
   tags = {
-    Name = "selectnocia-test-igw"
+    Name = "awsnoc-iaia-test-igw"
   }
 }
 
@@ -32,7 +32,7 @@ resource "aws_subnet" "public_subnets" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "selectnocia-test-public-subnet-${count.index + 1}"
+    Name = "awsnoc-iaia-test-public-subnet-${count.index + 1}"
     Type = "Public"
   }
 }
@@ -45,7 +45,7 @@ resource "aws_subnet" "private_subnets" {
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    Name = "selectnocia-test-private-subnet-${count.index + 1}"
+    Name = "awsnoc-iaia-test-private-subnet-${count.index + 1}"
     Type = "Private"
   }
 }
@@ -56,7 +56,7 @@ resource "aws_eip" "nat_eips" {
   domain = "vpc"
 
   tags = {
-    Name = "selectnocia-test-nat-eip-${count.index + 1}"
+    Name = "awsnoc-iaia-test-nat-eip-${count.index + 1}"
   }
 
   depends_on = [aws_internet_gateway.test_igw]
@@ -68,7 +68,7 @@ resource "aws_nat_gateway" "nat_gateways" {
   subnet_id     = aws_subnet.public_subnets[count.index].id
 
   tags = {
-    Name = "selectnocia-test-nat-gateway-${count.index + 1}"
+    Name = "awsnoc-iaia-test-nat-gateway-${count.index + 1}"
   }
 
   depends_on = [aws_internet_gateway.test_igw]
@@ -84,7 +84,7 @@ resource "aws_route_table" "public_rt" {
   }
 
   tags = {
-    Name = "selectnocia-test-public-rt"
+    Name = "awsnoc-iaia-test-public-rt"
   }
 }
 
@@ -98,7 +98,7 @@ resource "aws_route_table" "private_rt" {
   }
 
   tags = {
-    Name = "selectnocia-test-private-rt-${count.index + 1}"
+    Name = "awsnoc-iaia-test-private-rt-${count.index + 1}"
   }
 }
 

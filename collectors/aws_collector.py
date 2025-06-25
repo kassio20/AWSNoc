@@ -1,5 +1,5 @@
 """
-SelectNOC IA - AWS Collector with Native AI Integration
+AWSNoc IA IA - AWS Collector with Native AI Integration
 Coleta dados do CloudWatch e integra diretamente com Bedrock para análise
 """
 

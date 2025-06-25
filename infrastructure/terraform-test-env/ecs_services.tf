@@ -1,6 +1,6 @@
 # ECS Service for Hello World App
 resource "aws_ecs_service" "hello_world_service" {
-  name            = "selectnocia-hello-world-service"
+  name            = "awsnoc-iaia-hello-world-service"
   cluster         = aws_ecs_cluster.test_cluster.id
   task_definition = aws_ecs_task_definition.nodejs_hello_world_task.arn
   desired_count   = 2
@@ -21,13 +21,13 @@ resource "aws_ecs_service" "hello_world_service" {
   depends_on = [aws_lb_listener.test_listener]
 
   tags = {
-    Name = "selectnocia-hello-world-service"
+    Name = "awsnoc-iaia-hello-world-service"
   }
 }
 
 # ECS Service for Unhealthy App
 resource "aws_ecs_service" "unhealthy_app_service" {
-  name            = "selectnocia-unhealthy-app-service"
+  name            = "awsnoc-iaia-unhealthy-app-service"
   cluster         = aws_ecs_cluster.test_cluster.id
   task_definition = aws_ecs_task_definition.unhealthy_app_task.arn
   desired_count   = 1
@@ -48,7 +48,7 @@ resource "aws_ecs_service" "unhealthy_app_service" {
   depends_on = [aws_lb_listener.test_listener]
 
   tags = {
-    Name = "selectnocia-unhealthy-app-service"
+    Name = "awsnoc-iaia-unhealthy-app-service"
   }
 }
 

@@ -44,12 +44,12 @@
 - `/var/www/html/accounts_backup_logo_enhancement.html` - Backup de segurança
 
 #### Backend:
-- `/opt/selectnoc/simple_main.py` - Função `analyze_target_group_with_ai` melhorada
+- `/opt/awsnoc-ia/simple_main.py` - Função `analyze_target_group_with_ai` melhorada
 
 #### Scripts de Melhoria:
-- `/opt/selectnoc/enhance_logo.py` - Script de melhoria do logo
-- `/opt/selectnoc/enhance_subtitle.py` - Script de estrutura do subtítulo  
-- `/opt/selectnoc/enhance_ai_analysis.py` - Script de melhoria da IA
+- `/opt/awsnoc-ia/enhance_logo.py` - Script de melhoria do logo
+- `/opt/awsnoc-ia/enhance_subtitle.py` - Script de estrutura do subtítulo  
+- `/opt/awsnoc-ia/enhance_ai_analysis.py` - Script de melhoria da IA
 
 ### 🎯 4. RESULTADOS ESPERADOS
 

@@ -1,4 +1,4 @@
-# EC2 Instance para SelectNOC IA
+# EC2 Instance para AWSNoc-IA IA
 # Configuração da instância que vai hospedar a aplicação
 
 # AMI mais recente do Ubuntu

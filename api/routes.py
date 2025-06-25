@@ -1,5 +1,5 @@
 """
-SelectNOC IA - API Routes
+AWSNoc IA IA - API Routes
 Rotas da API para o sistema SaaS
 """
 
@@ -45,7 +45,7 @@ class HealthCheckResponse(BaseModel):
     components: Dict[str, str]
 
 
-def setup_routes(app, selectnoc_instance):
+def setup_routes(app, awsnoc-ia_instance):
     """Configura todas as rotas da API"""
     
     # Router principal
@@ -58,12 +58,12 @@ def setup_routes(app, selectnoc_instance):
         
         # Verificar componentes
         try:
-            if selectnoc_instance.collector:
+            if awsnoc-ia_instance.collector:
                 components["collector"] = "healthy"
             else:
                 components["collector"] = "not_initialized"
                 
-            if selectnoc_instance.analyzer:
+            if awsnoc-ia_instance.analyzer:
                 components["analyzer"] = "healthy"
             else:
                 components["analyzer"] = "not_initialized"
@@ -79,7 +79,7 @@ def setup_routes(app, selectnoc_instance):
         
         return HealthCheckResponse(
             status="healthy" if all(v == "healthy" or v == "assumed_healthy" for v in components.values()) else "degraded",
-            service="SelectNOC IA",
+            service="AWSNoc IA IA",
             version="1.0.0",
             timestamp=datetime.utcnow().isoformat() + "Z",
             components=components
@@ -91,7 +91,7 @@ def setup_routes(app, selectnoc_instance):
         Analisa um log usando IA
         """
         try:
-            if not selectnoc_instance.analyzer:
+            if not awsnoc-ia_instance.analyzer:
                 raise HTTPException(status_code=503, detail="Analisador não inicializado")
             
             # Criar evento de log simulado
@@ -109,7 +109,7 @@ def setup_routes(app, selectnoc_instance):
             )
             
             # Analisar com IA
-            analysis = await selectnoc_instance.analyzer.analyze_log(log_event)
+            analysis = await awsnoc-ia_instance.analyzer.analyze_log(log_event)
             
             return LogAnalysisResponse(
                 severity=analysis.get('severity', 'UNKNOWN'),
@@ -127,11 +127,11 @@ def setup_routes(app, selectnoc_instance):
     async def list_accounts():
         """Lista contas AWS configuradas"""
         try:
-            if not selectnoc_instance.collector:
+            if not awsnoc-ia_instance.collector:
                 return {"accounts": []}
             
             accounts = []
-            for collector in selectnoc_instance.collector.collectors:
+            for collector in awsnoc-ia_instance.collector.collectors:
                 accounts.append({
                     "account_id": collector.account_id,
                     "name": collector.account_config.get("name", "Unknown"),
@@ -260,18 +260,18 @@ def setup_routes(app, selectnoc_instance):
     async def get_ai_models_status():
         """Status dos modelos de IA"""
         try:
-            if not selectnoc_instance.analyzer:
+            if not awsnoc-ia_instance.analyzer:
                 return {"status": "not_initialized"}
             
             # Testar conectividade com Bedrock
             models_status = {
-                "bedrock_region": selectnoc_instance.analyzer.region,
+                "bedrock_region": awsnoc-ia_instance.analyzer.region,
                 "models": {
                     "claude_sonnet": "available",
                     "claude_haiku": "available", 
                     "titan_text": "available"
                 },
-                "cache_size": len(selectnoc_instance.analyzer._cache),
+                "cache_size": len(awsnoc-ia_instance.analyzer._cache),
                 "last_analysis": "2024-01-01T12:00:00Z"  # Em produção, timestamp real
             }
             
@@ -285,7 +285,7 @@ def setup_routes(app, selectnoc_instance):
     async def test_bedrock_connection():
         """Testa conectividade com Amazon Bedrock"""
         try:
-            if not selectnoc_instance.analyzer:
+            if not awsnoc-ia_instance.analyzer:
                 raise HTTPException(status_code=503, detail="Analisador não inicializado")
             
             # Teste simples com o Bedrock
@@ -299,7 +299,7 @@ def setup_routes(app, selectnoc_instance):
                 'region': 'us-east-1'
             })()
             
-            result = await selectnoc_instance.analyzer._quick_classification(test_log)
+            result = await awsnoc-ia_instance.analyzer._quick_classification(test_log)
             
             return {
                 "status": "success",
@@ -319,7 +319,7 @@ def setup_routes(app, selectnoc_instance):
     async def root():
         """Página inicial da API"""
         return {
-            "service": "SelectNOC IA",
+            "service": "AWSNoc IA IA",
             "description": "AI-Powered AWS Log Analysis SaaS",
             "version": "1.0.0",
             "docs": "/docs",

@@ -1,5 +1,5 @@
 """
-SelectNOC IA - Health Checker
+AWSNoc IA IA - Health Checker
 Sistema inteligente para detectar problemas reais em recursos AWS
 """
 
@@ -380,10 +380,10 @@ async def run_health_check(db_config):
 if __name__ == "__main__":
     # Configuração do banco (deve ser a mesma do simple_main.py)
     DB_CONFIG = {
-        "host": "selectnoc-dev-database.cjeqe6pc2viw.us-east-2.rds.amazonaws.com",
+        "host": "awsnoc-ia-dev-database.cjeqe6pc2viw.us-east-2.rds.amazonaws.com",
         "port": 5432,
-        "database": "selectnoc",
-        "user": "selectnoc_admin", 
+        "database": "awsnoc-ia",
+        "user": "awsnoc-ia_admin", 
         "password": "Dy6uGR1UVasJEp7D"
     }
     

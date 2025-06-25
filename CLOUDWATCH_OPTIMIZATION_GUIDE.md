@@ -1,4 +1,4 @@
-# SelectNOC IA - Guia de Otimização CloudWatch
+# AWSNoc IA IA - Guia de Otimização CloudWatch
 
 ## 📋 Resumo das Otimizações Implementadas
 
@@ -95,21 +95,21 @@ CACHE_TTL = {
 ### 1. Aplicar as Otimizações
 
 ```bash
-cd /opt/selectnoc
+cd /opt/awsnoc-ia
 python3 apply_cloudwatch_optimizations.py
 ```
 
 ### 2. Reiniciar o Serviço
 
 ```bash
-sudo systemctl restart selectnoc
+sudo systemctl restart awsnoc-ia
 ```
 
 ### 3. Verificar Status
 
 ```bash
 # Verificar logs
-sudo journalctl -u selectnoc -f
+sudo journalctl -u awsnoc-ia -f
 
 # Verificar cache
 curl http://localhost:8000/api/v1/cache/stats
@@ -135,7 +135,7 @@ python3 cloudwatch_cost_monitor.py
 
 ### Ajustar Intervalos de Polling
 
-Edite `/opt/selectnoc/config/cloudwatch_config.py`:
+Edite `/opt/awsnoc-ia/config/cloudwatch_config.py`:
 
 ```python
 # Para ambientes de desenvolvimento (menor frequência)
@@ -172,7 +172,7 @@ CACHE_TTL = {
 ### Problema: Cache não funciona
 ```bash
 # Verificar se módulos foram carregados
-grep "Módulos de otimização CloudWatch carregados" /var/log/selectnoc/app.log
+grep "Módulos de otimização CloudWatch carregados" /var/log/awsnoc-ia/app.log
 
 # Limpar cache
 curl -X POST http://localhost:8000/api/v1/cache/clear
@@ -213,19 +213,19 @@ curl -X POST http://localhost:8000/api/v1/alarms/discover
 ## 🔄 Rollback (se necessário)
 
 ```bash
-cd /opt/selectnoc
+cd /opt/awsnoc-ia
 
 # Restaurar backup
 cp simple_main_backup_before_optimizations_*.py simple_main.py
 
 # Reiniciar serviço
-sudo systemctl restart selectnoc
+sudo systemctl restart awsnoc-ia
 ```
 
 ## 📞 Suporte
 
 Para questões sobre as otimizações:
-1. Verificar logs: `/var/log/selectnoc/`
+1. Verificar logs: `/var/log/awsnoc-ia/`
 2. Testar endpoints: `/api/v1/cache/stats`
 3. Revisar configurações: `config/cloudwatch_config.py`
 

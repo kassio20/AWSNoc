@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SelectNOC IA - CloudWatch Cost Monitor
+AWSNoc IA IA - CloudWatch Cost Monitor
 Monitor de custos e otimização para consultas do CloudWatch
 """
 

@@ -1,4 +1,4 @@
-# 📋 SelectNOC IA - Contexto de Desenvolvimento
+# 📋 AWSNoc IA IA - Contexto de Desenvolvimento
 **Data:** 22/06/2025  
 **Sessão:** Correções críticas e melhorias na análise de IA
 
@@ -8,11 +8,11 @@
 - **Servidor:** Ubuntu Linux na AWS (3.13.129.191)
 - **NGINX:** Porta 80 (proxy reverso + arquivos estáticos)
 - **Backend Python:** Porta 8000 (FastAPI + uvicorn)
-- **Banco:** PostgreSQL RDS (selectnoc-dev-database.cjeqe6pc2viw.us-east-2.rds.amazonaws.com)
+- **Banco:** PostgreSQL RDS (awsnoc-ia-dev-database.cjeqe6pc2viw.us-east-2.rds.amazonaws.com)
 
 ### **Estrutura de Arquivos:**
 ```
-/opt/selectnoc/                    # Código fonte (GitHub)
+/opt/awsnoc-ia/                    # Código fonte (GitHub)
 ├── simple_main.py                # Backend principal (FastAPI)
 ├── frontend/
 │   ├── pages/
@@ -30,7 +30,7 @@
 
 ### **NGINX Configuração:**
 ```nginx
-# /etc/nginx/sites-enabled/selectnoc-clean
+# /etc/nginx/sites-enabled/awsnoc-ia-clean
 server {
     listen 80;
     root /var/www/html;
@@ -77,7 +77,7 @@ server {
 - Aplicadas correções pontuais sem quebrar funcionalidade
 
 ### **3. Análise SSM Conectando no Servidor Errado**
-**Problema:** IA analisava servidor SelectNOC em vez da instância Node.js quebrada
+**Problema:** IA analisava servidor AWSNoc IA em vez da instância Node.js quebrada
 
 **Causa Raiz:**
 - Critério de seleção muito amplo: any(keyword in tags for keyword in ['app', 'service', 'web'])
@@ -175,26 +175,26 @@ ssm = session.client('ssm', region_name=instance_region)
 
 ### **Reiniciar Backend:**
 ```bash
-cd /opt/selectnoc
+cd /opt/awsnoc-ia
 pkill -f "python3 simple_main.py"
 nohup python3 simple_main.py > app.log 2>&1 &
 ```
 
 ### **Verificar Logs:**
 ```bash
-tail -f /opt/selectnoc/app.log
+tail -f /opt/awsnoc-ia/app.log
 ```
 
 ### **Atualizar Frontend:**
 ```bash
 # Copiar arquivos corrigidos
-sudo cp /opt/selectnoc/account-details.html /var/www/html/
-sudo cp /opt/selectnoc/frontend/index.html /var/www/html/
+sudo cp /opt/awsnoc-ia/account-details.html /var/www/html/
+sudo cp /opt/awsnoc-ia/frontend/index.html /var/www/html/
 ```
 
 ### **Deploy de Mudanças:**
 ```bash
-cd /opt/selectnoc
+cd /opt/awsnoc-ia
 git pull origin main
 # Reiniciar backend (comando acima)
 # Copiar arquivos frontend (comando acima)
@@ -214,10 +214,10 @@ const API_BASE = window.location.origin + ':8000';
 ### **Database:**
 ```python
 DB_CONFIG = {
-    "host": "selectnoc-dev-database.cjeqe6pc2viw.us-east-2.rds.amazonaws.com",
+    "host": "awsnoc-ia-dev-database.cjeqe6pc2viw.us-east-2.rds.amazonaws.com",
     "port": 5432,
-    "database": "selectnoc", 
-    "user": "selectnoc_admin",
+    "database": "awsnoc-ia", 
+    "user": "awsnoc-ia_admin",
     "password": "Dy6uGR1UVasJEp7D"
 }
 ```

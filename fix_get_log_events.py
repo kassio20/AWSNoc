@@ -6,7 +6,7 @@ Script para corrigir as chamadas get_log_events problemáticas
 def fix_get_log_events():
     """Corrigir as chamadas get_log_events sem logStreamName"""
     
-    file_path = '/opt/selectnoc/simple_main.py'
+    file_path = '/opt/awsnoc-ia/simple_main.py'
     
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()

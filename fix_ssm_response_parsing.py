@@ -6,7 +6,7 @@ Corrigir parsing da resposta SSM
 def fix_ssm_response_parsing():
     """Corrigir o erro de parsing da resposta SSM"""
     
-    file_path = '/opt/selectnoc/simple_main.py'
+    file_path = '/opt/awsnoc-ia/simple_main.py'
     
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()

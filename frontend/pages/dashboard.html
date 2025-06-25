@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SelectNOC IA - Monitoramento Inteligente</title>
+    <title>AWSNoc IA IA - Monitoramento Inteligente</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -316,7 +316,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>🚀 SelectNOC IA - Monitoramento Inteligente</h1>
+            <h1>🚀 AWSNoc IA IA - Monitoramento Inteligente</h1>
             <div class="subtitle">Análise Automática de Infraestrutura AWS com IA</div>
             <div id="last-update" class="last-update">Última atualização: --</div>
             <div class="auto-refresh">
@@ -637,7 +637,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SelectNOC IA - Dashboard</title>
+    <title>AWSNoc IA IA - Dashboard</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -891,7 +891,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>🚀 SelectNOC IA</h1>
+        <h1>🚀 AWSNoc IA IA</h1>
         <div class="nav">
             <button onclick="showSection('dashboard')" class="active" id="nav-dashboard">Dashboard</button>
             <button onclick="showSection('accounts')" id="nav-accounts">Contas AWS</button>
@@ -925,7 +925,7 @@
 
             <div class="card">
                 <h2>🧪 Teste da IA</h2>
-                <p>Teste a análise inteligente de logs do SelectNOC IA:</p>
+                <p>Teste a análise inteligente de logs do AWSNoc IA IA:</p>
                 <br>
                 <button class="btn" onclick="testHealth()">Test Health</button>
                 <button class="btn" onclick="testBedrock()">Test Bedrock IA</button>
@@ -1187,7 +1187,7 @@
             };
             
             accounts.push(account);
-            localStorage.setItem('selectnoc_accounts', JSON.stringify(accounts));
+            localStorage.setItem('awsnoc-ia_accounts', JSON.stringify(accounts));
             
             loadAccounts();
             closeAddAccountModal();
@@ -1197,7 +1197,7 @@
         });
 
         function loadAccounts() {
-            const stored = localStorage.getItem('selectnoc_accounts');
+            const stored = localStorage.getItem('awsnoc-ia_accounts');
             if (stored) {
                 accounts = JSON.parse(stored);
             }
@@ -1225,7 +1225,7 @@
         function deleteAccount(id) {
             if (confirm('Tem certeza que deseja excluir esta conta?')) {
                 accounts = accounts.filter(acc => acc.id !== id);
-                localStorage.setItem('selectnoc_accounts', JSON.stringify(accounts));
+                localStorage.setItem('awsnoc-ia_accounts', JSON.stringify(accounts));
                 loadAccounts();
                 updateStats();
             }

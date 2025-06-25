@@ -1,6 +1,6 @@
 # Application Load Balancer
 resource "aws_lb" "test_alb" {
-  name               = "selectnocia-test-alb"
+  name               = "awsnoc-iaia-test-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
@@ -9,13 +9,13 @@ resource "aws_lb" "test_alb" {
   enable_deletion_protection = false
 
   tags = {
-    Name = "selectnocia-test-alb"
+    Name = "awsnoc-iaia-test-alb"
   }
 }
 
 # Target Group for Hello World App
 resource "aws_lb_target_group" "hello_world_tg" {
-  name        = "selectnocia-hello-world-tg"
+  name        = "awsnoc-iaia-hello-world-tg"
   port        = 80
   protocol    = "HTTP"
   vpc_id      = aws_vpc.test_vpc.id
@@ -34,13 +34,13 @@ resource "aws_lb_target_group" "hello_world_tg" {
   }
 
   tags = {
-    Name = "selectnocia-hello-world-tg"
+    Name = "awsnoc-iaia-hello-world-tg"
   }
 }
 
 # Target Group for Unhealthy App (for failure simulation)
 resource "aws_lb_target_group" "unhealthy_app_tg" {
-  name        = "selectnocia-unhealthy-app-tg"
+  name        = "awsnoc-iaia-unhealthy-app-tg"
   port        = 3000
   protocol    = "HTTP"
   vpc_id      = aws_vpc.test_vpc.id
@@ -59,7 +59,7 @@ resource "aws_lb_target_group" "unhealthy_app_tg" {
   }
 
   tags = {
-    Name = "selectnocia-unhealthy-app-tg"
+    Name = "awsnoc-iaia-unhealthy-app-tg"
   }
 }
 

@@ -1,4 +1,4 @@
-# SelectNOC IA - AWS Native AI Configuration
+# AWSNoc IA IA - AWS Native AI Configuration
 # Maximizando recursos de IA da AWS para análise inteligente de logs
 
 # AWS AI Services Stack
@@ -111,21 +111,21 @@ aws_ai_stack:
     endpoints:
       # Detector de anomalias em métricas
       anomaly_detector:
-        endpoint_name: "selectnoc-anomaly-detector-v1"
+        endpoint_name: "awsnoc-ia-anomaly-detector-v1"
         instance_type: "ml.m5.large"
         algorithm: "randomcutforest"
         use_case: "CloudWatch metrics anomaly detection"
         
       # Classificador de logs customizado
       log_classifier:
-        endpoint_name: "selectnoc-log-classifier-v1"
+        endpoint_name: "awsnoc-ia-log-classifier-v1"
         instance_type: "ml.m5.xlarge"
         algorithm: "blazingtext"
         use_case: "AWS service-specific log classification"
         
       # Preditor de falhas
       failure_predictor:
-        endpoint_name: "selectnoc-failure-predictor-v1"
+        endpoint_name: "awsnoc-ia-failure-predictor-v1"
         instance_type: "ml.m5.large"
         algorithm: "xgboost"
         use_case: "Predictive failure analysis"
@@ -133,7 +133,7 @@ aws_ai_stack:
     # Treinamento automatizado
     training:
       schedule: "weekly"
-      data_source: "s3://selectnoc-training-data/"
+      data_source: "s3://awsnoc-ia-training-data/"
       model_validation: "automated"
       
   # Amazon Comprehend - NLP Nativo
@@ -153,7 +153,7 @@ aws_ai_stack:
         
       # Classificação customizada
       custom_classification:
-        model_name: "selectnoc-aws-log-classifier"
+        model_name: "awsnoc-ia-aws-log-classifier"
         categories: ["network", "database", "compute", "storage"]
         
       # Detecção de tópicos
@@ -249,7 +249,7 @@ lambda_functions:
 # Vector Database para Embeddings
 vector_database:
   service: "opensearch_serverless"
-  collection: "selectnoc-log-embeddings"
+  collection: "awsnoc-ia-log-embeddings"
   
   configuration:
     dimensions: 1536  # Titan embeddings
@@ -267,15 +267,15 @@ knowledge_base:
   
   data_sources:
     aws_documentation:
-      source: "s3://selectnoc-kb/aws-docs/"
+      source: "s3://awsnoc-ia-kb/aws-docs/"
       type: "documentation"
       
     runbooks:
-      source: "s3://selectnoc-kb/runbooks/"
+      source: "s3://awsnoc-ia-kb/runbooks/"
       type: "procedures"
       
     incident_history:
-      source: "s3://selectnoc-kb/incidents/"
+      source: "s3://awsnoc-ia-kb/incidents/"
       type: "historical_data"
       
   retrieval:

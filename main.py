@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SelectNOC IA - Sistema Principal
+AWSNoc IA IA - Sistema Principal
 Sistema SaaS de análise inteligente de logs AWS usando Bedrock e Claude-3
 """
 
@@ -44,16 +44,16 @@ structlog.configure(
 logger = structlog.get_logger(__name__)
 
 
-class SelectNOCIA:
+class AWSNoc IAIA:
     """
-    Classe principal do sistema SelectNOC IA
+    Classe principal do sistema AWSNoc IA IA
     """
     
     def __init__(self, config_path: str = "config/aws_ai_config.yaml"):
         self.config_path = config_path
         self.config = self._load_config()
         self.app = FastAPI(
-            title="SelectNOC IA",
+            title="AWSNoc IA IA",
             description="AI-Powered AWS Log Analysis SaaS",
             version="1.0.0",
             docs_url="/docs",
@@ -93,7 +93,7 @@ class SelectNOCIA:
     async def initialize(self):
         """Inicializa todos os componentes do sistema"""
         try:
-            logger.info("Inicializando SelectNOC IA...")
+            logger.info("Inicializando AWSNoc IA IA...")
             
             # Configurar exemplo de contas AWS (em produção virá do banco)
             accounts_config = [
@@ -115,7 +115,7 @@ class SelectNOCIA:
                 region=self.config.get("aws_ai_stack", {}).get("bedrock", {}).get("region_primary", "us-east-1")
             )
             
-            logger.info("SelectNOC IA inicializado com sucesso")
+            logger.info("AWSNoc IA IA inicializado com sucesso")
             
         except Exception as e:
             logger.error("Erro na inicialização", error=str(e))
@@ -179,24 +179,24 @@ class SelectNOCIA:
 
 
 # Instância global
-selectnoc = SelectNOCIA()
-app = selectnoc.app
+awsnoc-ia = AWSNoc IAIA()
+app = awsnoc-ia.app
 
 
 # Eventos do FastAPI
 @app.on_event("startup")
 async def startup_event():
     """Executado na inicialização do servidor"""
-    await selectnoc.initialize()
+    await awsnoc-ia.initialize()
     
     # Iniciar monitoramento em background
-    asyncio.create_task(selectnoc.start_monitoring())
+    asyncio.create_task(awsnoc-ia.start_monitoring())
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Executado no shutdown do servidor"""
-    logger.info("Encerrando SelectNOC IA...")
+    logger.info("Encerrando AWSNoc IA IA...")
 
 
 # Health check endpoint
@@ -205,7 +205,7 @@ async def health_check():
     """Endpoint de health check"""
     return {
         "status": "healthy",
-        "service": "SelectNOC IA",
+        "service": "AWSNoc IA IA",
         "version": "1.0.0",
         "timestamp": "2024-01-01T00:00:00Z"
     }
@@ -225,7 +225,7 @@ async def analyze_log(log_data: dict):
     }
     """
     try:
-        if not selectnoc.analyzer:
+        if not awsnoc-ia.analyzer:
             raise HTTPException(status_code=503, detail="Analisador não inicializado")
         
         # Simular um evento de log
@@ -244,7 +244,7 @@ async def analyze_log(log_data: dict):
         )
         
         # Analisar com IA
-        analysis = await selectnoc.analyzer.analyze_log(log_event)
+        analysis = await awsnoc-ia.analyzer.analyze_log(log_event)
         
         return {
             "input": log_data,
@@ -261,7 +261,7 @@ def main():
     """Função principal"""
     import argparse
     
-    parser = argparse.ArgumentParser(description="SelectNOC IA - Sistema de Análise Inteligente de Logs AWS")
+    parser = argparse.ArgumentParser(description="AWSNoc IA IA - Sistema de Análise Inteligente de Logs AWS")
     parser.add_argument("--host", default="0.0.0.0", help="Host para o servidor")
     parser.add_argument("--port", type=int, default=8000, help="Porta para o servidor")
     parser.add_argument("--config", default="config/aws_ai_config.yaml", help="Arquivo de configuração")
@@ -269,18 +269,18 @@ def main():
     args = parser.parse_args()
     
     # Atualizar caminho da configuração
-    global selectnoc
-    selectnoc = SelectNOCIA(config_path=args.config)
+    global awsnoc-ia
+    awsnoc-ia = AWSNoc IAIA(config_path=args.config)
     
     # Executar servidor
     logger.info(
-        "Iniciando SelectNOC IA",
+        "Iniciando AWSNoc IA IA",
         host=args.host,
         port=args.port,
         config=args.config
     )
     
-    selectnoc.run(host=args.host, port=args.port)
+    awsnoc-ia.run(host=args.host, port=args.port)
 
 
 if __name__ == "__main__":

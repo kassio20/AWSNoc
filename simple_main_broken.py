@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SelectNOC IA - Versão Simples e Funcional
+AWSNoc IA IA - Versão Simples e Funcional
 Sistema SaaS básico para monitoramento AWS
 """
 
@@ -17,15 +17,15 @@ from datetime import datetime
 
 # Configuração do banco
 DB_CONFIG = {
-    "host": "selectnoc-dev-database.cjeqe6pc2viw.us-east-2.rds.amazonaws.com",
+    "host": "awsnoc-ia-dev-database.cjeqe6pc2viw.us-east-2.rds.amazonaws.com",
     "port": 5432,
-    "database": "selectnoc",
-    "user": "selectnoc_admin", 
+    "database": "awsnoc-ia",
+    "user": "awsnoc-ia_admin", 
     "password": "Dy6uGR1UVasJEp7D"
 }
 
 app = FastAPI(
-    title="SelectNOC IA",
+    title="AWSNoc IA IA",
     description="AI-Powered AWS Monitoring SaaS",
     version="1.0.0"
 )
@@ -75,14 +75,14 @@ def safe_json_loads(value):
 @app.get("/")
 async def root():
     return {
-        "message": "SelectNOC IA - Sistema de Monitoramento AWS",
+        "message": "AWSNoc IA IA - Sistema de Monitoramento AWS",
         "status": "running",
         "version": "1.0.0"
     }
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "service": "SelectNOC IA"}
+    return {"status": "healthy", "service": "AWSNoc IA IA"}
 
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard():
@@ -93,7 +93,7 @@ async def dashboard():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>SelectNOC IA - Dashboard</title>
+        <title>AWSNoc IA IA - Dashboard</title>
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { 
@@ -129,7 +129,7 @@ async def dashboard():
     <body>
         <div class="container">
             <div class="header">
-                <h1>🚀 SelectNOC IA</h1>
+                <h1>🚀 AWSNoc IA IA</h1>
                 <p>Sistema de Monitoramento Inteligente AWS</p>
                 <p class="loading" id="status">Carregando...</p>
             </div>
@@ -470,7 +470,7 @@ async def redirect_root():
     </head>
     <body>
         <div style="text-align: center;">
-            <h1>🚀 SelectNOC IA</h1>
+            <h1>🚀 AWSNoc IA IA</h1>
             <p>Redirecionando...</p>
         </div>
     </body>

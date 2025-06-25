@@ -1,5 +1,5 @@
 """
-SelectNOC IA - Bedrock Analyzer
+AWSNoc IA IA - Bedrock Analyzer
 Analisador de logs usando Amazon Bedrock com Claude-3
 """
 

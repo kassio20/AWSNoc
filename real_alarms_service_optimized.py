@@ -1,5 +1,5 @@
 """
-SelectNOC IA - Real CloudWatch Alarms Service - Versão Otimizada
+AWSNoc IA IA - Real CloudWatch Alarms Service - Versão Otimizada
 Serviço otimizado para descoberta e análise de alarmes reais com controle de custos
 """
 from typing import List, Dict, Any, Optional

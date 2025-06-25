@@ -1,5 +1,5 @@
 """
-SelectNOC IA - CloudWatch Alarms Discovery - Versão Otimizada
+AWSNoc IA IA - CloudWatch Alarms Discovery - Versão Otimizada
 Módulo otimizado para descoberta e análise de alarmes com cache e controle de custos
 """
 

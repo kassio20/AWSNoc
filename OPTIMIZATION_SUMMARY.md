@@ -2,7 +2,7 @@
 
 ## 📋 Resumo Executivo
 
-As otimizações para redução de custos do CloudWatch foram implementadas com sucesso no sistema SelectNOC IA. O sistema agora opera com consultas em intervalos de 30 segundos, cache inteligente e otimizações avançadas.
+As otimizações para redução de custos do CloudWatch foram implementadas com sucesso no sistema AWSNoc IA IA. O sistema agora opera com consultas em intervalos de 30 segundos, cache inteligente e otimizações avançadas.
 
 ## 🎯 Objetivos Alcançados
 
@@ -114,8 +114,8 @@ CACHE_TTL = {
 ## 🔄 Próximos Passos
 
 ### Imediatos (Hoje)
-1. ✅ Reiniciar o serviço: `sudo systemctl restart selectnoc`
-2. ✅ Verificar logs: `sudo journalctl -u selectnoc -f`
+1. ✅ Reiniciar o serviço: `sudo systemctl restart awsnoc-ia`
+2. ✅ Verificar logs: `sudo journalctl -u awsnoc-ia -f`
 3. ✅ Acessar dashboard para confirmar modo otimizado
 
 ### Monitoramento (24-48h)
@@ -134,7 +134,7 @@ CACHE_TTL = {
 ### Se Cache não Funcionar
 ```bash
 # Verificar módulos carregados
-grep "Módulos de otimização CloudWatch carregados" /var/log/selectnoc/app.log
+grep "Módulos de otimização CloudWatch carregados" /var/log/awsnoc-ia/app.log
 
 # Limpar cache
 curl -X POST http://localhost:8000/api/v1/cache/clear
@@ -151,9 +151,9 @@ python3 -c "from config.cloudwatch_config import CloudWatchConfig; print(CloudWa
 
 ### Rollback de Emergência
 ```bash
-cd /opt/selectnoc
+cd /opt/awsnoc-ia
 cp simple_main_backup_before_optimizations_20250624_200302.py simple_main.py
-sudo systemctl restart selectnoc
+sudo systemctl restart awsnoc-ia
 ```
 
 ## 🎉 Conclusão

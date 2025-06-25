@@ -1,4 +1,4 @@
-# SelectNOC IA - Nova Infraestrutura AWS
+# AWSNoc-IA IA - Nova Infraestrutura AWS
 # Setup completo do zero com configuração moderna
 
 terraform {
@@ -21,7 +21,7 @@ provider "aws" {
   
   default_tags {
     tags = {
-      Project     = "SelectNOC-IA"
+      Project     = "AWSNoc-IA-IA"
       Environment = var.environment
       ManagedBy   = "Terraform"
       Owner       = "NOC-Team"
@@ -33,7 +33,7 @@ provider "aws" {
 variable "project_name" {
   description = "Nome do projeto"
   type        = string
-  default     = "selectnoc"
+  default     = "awsnoc-ia"
 }
 
 variable "environment" {
@@ -246,8 +246,8 @@ resource "aws_db_instance" "main" {
   storage_encrypted     = false
 
   # Database
-  db_name  = "selectnoc"
-  username = "selectnoc_admin"
+  db_name  = "awsnoc-ia"
+  username = "awsnoc-ia_admin"
   password = var.db_password
 
   # Network

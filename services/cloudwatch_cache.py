@@ -1,5 +1,5 @@
 """
-SelectNOC IA - Cache Service para CloudWatch
+AWSNoc IA IA - Cache Service para CloudWatch
 Serviço de cache para otimizar consultas e reduzir custos do CloudWatch
 """
 

@@ -1,5 +1,5 @@
 """
-SelectNOC IA - Configuração de CloudWatch
+AWSNoc IA IA - Configuração de CloudWatch
 Configurações para otimizar custos de consultas do CloudWatch
 """
 

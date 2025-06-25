@@ -1,8 +1,8 @@
-# 🚀 Guia de Deployment - SelectNOC IA
+# 🚀 Guia de Deployment - AWSNoc IA IA
 
 ## 📋 Visão Geral
 
-Este guia cobre o deployment completo do SelectNOC IA na sua conta AWS, criando uma ferramenta interna para seu NOC monitorar múltiplas contas de clientes.
+Este guia cobre o deployment completo do AWSNoc IA IA na sua conta AWS, criando uma ferramenta interna para seu NOC monitorar múltiplas contas de clientes.
 
 ## 🎯 Arquitetura Final
 
@@ -63,12 +63,12 @@ sudo apt-get install -y nodejs
 ### 2. Configurar AWS CLI
 ```bash
 # Configure com suas credenciais
-aws configure --profile selectnoc-deploy
+aws configure --profile awsnoc-ia-deploy
 # Região: us-east-1 (ou sua preferida)
 # Format: json
 
 # Verificar acesso
-aws sts get-caller-identity --profile selectnoc-deploy
+aws sts get-caller-identity --profile awsnoc-ia-deploy
 ```
 
 ### 3. Verificar Acesso ao Bedrock
@@ -76,7 +76,7 @@ aws sts get-caller-identity --profile selectnoc-deploy
 # Verificar modelos disponíveis
 aws bedrock list-foundation-models \
   --region us-east-1 \
-  --profile selectnoc-deploy
+  --profile awsnoc-ia-deploy
 
 # Se não tiver acesso, solicitar no console AWS:
 # https://console.aws.amazon.com/bedrock/home#/modelaccess
@@ -108,10 +108,10 @@ cd ..
 ### Etapa 2: Build das Imagens Docker
 ```bash
 # 1. Build da API
-docker build -t selectnoc-ia/api:latest -f docker/Dockerfile.api .
+docker build -t awsnoc-ia-ia/api:latest -f docker/Dockerfile.api .
 
 # 2. Build do Collector
-docker build -t selectnoc-ia/collector:latest -f docker/Dockerfile.collector .
+docker build -t awsnoc-ia-ia/collector:latest -f docker/Dockerfile.collector .
 
 # 3. Build do Frontend
 cd frontend
@@ -131,13 +131,13 @@ terraform init
 terraform plan \
   -var="aws_region=us-east-1" \
   -var="environment=production" \
-  -var="domain_name=selectnoc.ai"
+  -var="domain_name=awsnoc-ia.ai"
 
 # 4. Aplicar infraestrutura
 terraform apply \
   -var="aws_region=us-east-1" \
   -var="environment=production" \
-  -var="domain_name=selectnoc.ai"
+  -var="domain_name=awsnoc-ia.ai"
 
 # 5. Salvar outputs importantes
 terraform output > ../outputs.txt
@@ -150,15 +150,15 @@ ECR_API=$(terraform output -raw ecr_api_repository_url)
 ECR_COLLECTOR=$(terraform output -raw ecr_collector_repository_url)
 
 # 2. Login no ECR
-aws ecr get-login-password --region us-east-1 --profile selectnoc-deploy | \
+aws ecr get-login-password --region us-east-1 --profile awsnoc-ia-deploy | \
   docker login --username AWS --password-stdin $ECR_API
 
 # 3. Tag e push API
-docker tag selectnoc-ia/api:latest $ECR_API:latest
+docker tag awsnoc-ia-ia/api:latest $ECR_API:latest
 docker push $ECR_API:latest
 
 # 4. Tag e push Collector
-docker tag selectnoc-ia/collector:latest $ECR_COLLECTOR:latest
+docker tag awsnoc-ia-ia/collector:latest $ECR_COLLECTOR:latest
 docker push $ECR_COLLECTOR:latest
 ```
 
@@ -169,18 +169,18 @@ S3_BUCKET=$(terraform output -raw s3_frontend_bucket)
 
 # 2. Sync frontend build
 aws s3 sync frontend/dist/ s3://$S3_BUCKET/ \
-  --profile selectnoc-deploy \
+  --profile awsnoc-ia-deploy \
   --delete
 
 # 3. Invalidar CloudFront
 CLOUDFRONT_ID=$(aws cloudfront list-distributions \
-  --query "DistributionList.Items[?Comment=='SelectNOC IA Frontend'].Id" \
-  --output text --profile selectnoc-deploy)
+  --query "DistributionList.Items[?Comment=='AWSNoc IA IA Frontend'].Id" \
+  --output text --profile awsnoc-ia-deploy)
 
 aws cloudfront create-invalidation \
   --distribution-id $CLOUDFRONT_ID \
   --paths "/*" \
-  --profile selectnoc-deploy
+  --profile awsnoc-ia-deploy
 ```
 
 ### Etapa 6: Configurar Database
@@ -206,14 +206,14 @@ ALB_URL=$(terraform output -raw alb_dns_name)
 curl http://$ALB_URL/health
 
 # Resposta esperada:
-# {"status": "healthy", "service": "SelectNOC IA"}
+# {"status": "healthy", "service": "AWSNoc IA IA"}
 ```
 
 ### 2. Configurar DNS (Opcional)
 ```bash
 # Se você tem um domínio, criar registros:
-# app.selectnoc.ai -> CNAME para CloudFront
-# api.selectnoc.ai -> CNAME para ALB
+# app.awsnoc-ia.ai -> CNAME para CloudFront
+# api.awsnoc-ia.ai -> CNAME para ALB
 ```
 
 ### 3. Testar Bedrock
@@ -284,9 +284,9 @@ Roles:
 ### 2. Monitoramento da Plataforma
 ```bash
 # CloudWatch Dashboards criados automaticamente:
-# - SelectNOC-IA-Application-Performance
-# - SelectNOC-IA-Customer-Usage
-# - SelectNOC-IA-AI-Performance
+# - AWSNoc IA-IA-Application-Performance
+# - AWSNoc IA-IA-Customer-Usage
+# - AWSNoc IA-IA-AI-Performance
 ```
 
 ### 3. Backup e Disaster Recovery
@@ -366,15 +366,15 @@ Por 1M logs processados: "+$50-100/mês"
 ### 2. Manual Updates
 ```bash
 # Update API
-docker build -t selectnoc-ia/api:v1.1 .
-docker tag selectnoc-ia/api:v1.1 $ECR_API:v1.1
+docker build -t awsnoc-ia-ia/api:v1.1 .
+docker tag awsnoc-ia-ia/api:v1.1 $ECR_API:v1.1
 docker push $ECR_API:v1.1
 
 # Update ECS service
 aws ecs update-service \
-  --cluster selectnoc-ia-cluster \
-  --service selectnoc-ia-api-service \
-  --task-definition selectnoc-ia-api:v1.1
+  --cluster awsnoc-ia-ia-cluster \
+  --service awsnoc-ia-ia-api-service \
+  --task-definition awsnoc-ia-ia-api:v1.1
 ```
 
 ## 🆘 Troubleshooting
@@ -382,8 +382,8 @@ aws ecs update-service \
 ### 1. Problemas Comuns
 ```bash
 # ECS Tasks não iniciam
-aws ecs describe-services --cluster selectnoc-ia-cluster
-aws logs tail /ecs/selectnoc-ia --follow
+aws ecs describe-services --cluster awsnoc-ia-ia-cluster
+aws logs tail /ecs/awsnoc-ia-ia --follow
 
 # Bedrock não funciona
 aws bedrock list-foundation-models --region us-east-1
@@ -395,10 +395,10 @@ aws cloudfront list-invalidations --distribution-id $CLOUDFRONT_ID
 ### 2. Logs Importantes
 ```bash
 # Application logs
-aws logs tail /ecs/selectnoc-ia --follow
+aws logs tail /ecs/awsnoc-ia-ia --follow
 
 # Database logs
-aws rds describe-db-log-files --db-instance-identifier selectnoc-ia-db
+aws rds describe-db-log-files --db-instance-identifier awsnoc-ia-ia-db
 
 # Load balancer logs
 # (Configurados para S3 automaticamente)
@@ -420,8 +420,8 @@ aws rds describe-db-log-files --db-instance-identifier selectnoc-ia-db
 ```bash
 # Aumentar capacidade ECS
 aws ecs update-service \
-  --cluster selectnoc-ia-cluster \
-  --service selectnoc-ia-api-service \
+  --cluster awsnoc-ia-ia-cluster \
+  --service awsnoc-ia-ia-api-service \
   --desired-count 4
 
 # Upgrade database
@@ -445,5 +445,5 @@ aws ecs update-service \
 
 ---
 
-🎉 **Parabéns!** Seu SelectNOC IA está pronto para monitorar múltiplas contas AWS com inteligência artificial!
+🎉 **Parabéns!** Seu AWSNoc IA IA está pronto para monitorar múltiplas contas AWS com inteligência artificial!
 

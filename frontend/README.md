@@ -1,4 +1,4 @@
-# 🎨 Frontend SelectNOC
+# 🎨 Frontend AWSNoc IA
 
 ## 📁 Estrutura do Frontend
 

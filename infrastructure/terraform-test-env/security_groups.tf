@@ -1,6 +1,6 @@
 # Security Group for Application Load Balancer
 resource "aws_security_group" "alb_sg" {
-  name        = "selectnocia-test-alb-sg"
+  name        = "awsnoc-iaia-test-alb-sg"
   description = "Security group for Application Load Balancer"
   vpc_id      = aws_vpc.test_vpc.id
 
@@ -20,13 +20,13 @@ resource "aws_security_group" "alb_sg" {
   }
 
   tags = {
-    Name = "selectnocia-test-alb-sg"
+    Name = "awsnoc-iaia-test-alb-sg"
   }
 }
 
 # Security Group for ECS Tasks
 resource "aws_security_group" "ecs_task_sg" {
-  name        = "selectnocia-test-ecs-task-sg"
+  name        = "awsnoc-iaia-test-ecs-task-sg"
   description = "Security group for ECS tasks"
   vpc_id      = aws_vpc.test_vpc.id
 
@@ -54,7 +54,7 @@ resource "aws_security_group" "ecs_task_sg" {
   }
 
   tags = {
-    Name = "selectnocia-test-ecs-task-sg"
+    Name = "awsnoc-iaia-test-ecs-task-sg"
   }
 }
 

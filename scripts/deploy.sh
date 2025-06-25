@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 SelectNOC IA - Deploy Script"
+echo "🚀 AWSNoc IA IA - Deploy Script"
 echo "================================"
 
 # Colors
@@ -27,17 +27,17 @@ echo -e "${YELLOW}🗄️ Setting up database...${NC}"
 python database/scripts/database_manager.py
 
 echo -e "${YELLOW}⚙️ Configuring systemd service...${NC}"
-sudo cp deployment/selectnoc.service /etc/systemd/system/
+sudo cp deployment/awsnoc-ia.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable selectnoc
+sudo systemctl enable awsnoc-ia
 
 echo -e "${YELLOW}🌐 Configuring Nginx...${NC}"
-sudo cp deployment/nginx.conf /etc/nginx/sites-available/selectnoc
-sudo ln -sf /etc/nginx/sites-available/selectnoc /etc/nginx/sites-enabled/
+sudo cp deployment/nginx.conf /etc/nginx/sites-available/awsnoc-ia
+sudo ln -sf /etc/nginx/sites-available/awsnoc-ia /etc/nginx/sites-enabled/
 sudo systemctl restart nginx
 
-echo -e "${YELLOW}🚀 Starting SelectNOC service...${NC}"
-sudo systemctl start selectnoc
+echo -e "${YELLOW}🚀 Starting AWSNoc IA service...${NC}"
+sudo systemctl start awsnoc-ia
 
 echo -e "${GREEN}✅ Deploy completed successfully!${NC}"
 echo -e "${GREEN}🌍 Access: http://$(curl -s ifconfig.me)${NC}"

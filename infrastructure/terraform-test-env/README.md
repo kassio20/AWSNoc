@@ -78,24 +78,24 @@ Restaura o health check para sucesso.
 
 ### 3. Parar Serviço
 ```bash
-aws ecs update-service --cluster selectnocia-test-cluster --service selectnocia-unhealthy-app-service --desired-count 0
+aws ecs update-service --cluster awsnoc-iaia-test-cluster --service awsnoc-iaia-unhealthy-app-service --desired-count 0
 ```
 
 ### 4. Escalar Serviço
 ```bash
-aws ecs update-service --cluster selectnocia-test-cluster --service selectnocia-hello-world-service --desired-count 4
+aws ecs update-service --cluster awsnoc-iaia-test-cluster --service awsnoc-iaia-hello-world-service --desired-count 4
 ```
 
 ## Monitoramento
 
 ### CloudWatch Logs
 ```bash
-aws logs describe-log-groups --log-group-name-prefix "/ecs/selectnocia-test"
+aws logs describe-log-groups --log-group-name-prefix "/ecs/awsnoc-iaia-test"
 ```
 
 ### ECS Service Status
 ```bash
-aws ecs describe-services --cluster selectnocia-test-cluster --services selectnocia-hello-world-service selectnocia-unhealthy-app-service
+aws ecs describe-services --cluster awsnoc-iaia-test-cluster --services awsnoc-iaia-hello-world-service awsnoc-iaia-unhealthy-app-service
 ```
 
 ### Target Group Health

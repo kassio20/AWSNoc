@@ -19,10 +19,10 @@ from ai_analysis import AIAnalysisService
 load_dotenv()
 
 # Database configuration
-DB_HOST = "selectnoc-dev-database.cjeqe6pc2viw.us-east-2.rds.amazonaws.com"
+DB_HOST = "awsnoc-ia-dev-database.cjeqe6pc2viw.us-east-2.rds.amazonaws.com"
 DB_PORT = 5432
-DB_NAME = "selectnoc"
-DB_USER = "selectnoc_admin"
+DB_NAME = "awsnoc-ia"
+DB_USER = "awsnoc-ia_admin"
 DB_PASSWORD = "Dy6uGR1UVasJEp7D"
 
 # Initialize services
@@ -65,7 +65,7 @@ class AlertCreate(BaseModel):
     description: Optional[str] = None
 
 app = FastAPI(
-    title="SelectNOC IA",
+    title="AWSNoc IA IA",
     description="AI-Powered AWS Log Analysis - Development",
     version="1.0.0-dev"
 )
@@ -82,7 +82,7 @@ app.add_middleware(
 @app.get("/")
 async def root():
     return {
-        "message": "SelectNOC IA - Development Environment",
+        "message": "AWSNoc IA IA - Development Environment",
         "status": "running",
         "version": "1.0.0-dev"
     }
@@ -91,7 +91,7 @@ async def root():
 async def health_check():
     return {
         "status": "healthy",
-        "service": "SelectNOC IA",
+        "service": "AWSNoc IA IA",
         "environment": "development",
         "version": "1.0.0"
     }

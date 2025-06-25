@@ -1,5 +1,5 @@
 """
-SelectNOC IA - CloudWatch Alarms Discovery
+AWSNoc IA IA - CloudWatch Alarms Discovery
 Módulo para descoberta e análise de alarmes reais do CloudWatch
 """
 

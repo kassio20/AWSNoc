@@ -6,7 +6,7 @@ Adicionar análise de instâncias EC2 via SSM na análise de Target Group
 def enhance_target_group_ec2_analysis():
     """Adicionar descoberta e análise de instâncias EC2 via SSM"""
     
-    file_path = '/opt/selectnoc/simple_main.py'
+    file_path = '/opt/awsnoc-ia/simple_main.py'
     
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
