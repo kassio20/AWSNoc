@@ -9,6 +9,7 @@ import json
 import psycopg2
 import psycopg2.extras
 from fastapi import FastAPI, HTTPException
+from botocore.exceptions import NoCredentialsError, ClientError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
@@ -18,10 +19,10 @@ from datetime import datetime
 
 # Configuração do banco
 DB_CONFIG = {
-    "host": "awsnoc-ia-dev-database.cjeqe6pc2viw.us-east-2.rds.amazonaws.com",
+    "host": "selectnoc-dev-database.cjeqe6pc2viw.us-east-2.rds.amazonaws.com",
     "port": 5432,
-    "database": "awsnoc-ia",
-    "user": "awsnoc-ia_admin", 
+    "database": "selectnoc",
+    "user": "selectnoc_admin", 
     "password": "Dy6uGR1UVasJEp7D"
 }
 
@@ -515,7 +516,6 @@ async def get_ecs_services(account_id: int):
             raise HTTPException(status_code=404, detail=f"Conta {account_id} não encontrada")
         
         import boto3
-        from botocore.exceptions import ClientError, NoCredentialsError
         
         # Criar sessão AWS
         session = boto3.Session(
