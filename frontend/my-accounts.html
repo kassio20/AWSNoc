@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS NOC - Minhas Contas</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            color: #e6edf3;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .header {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .btn-logout {
+            padding: 0.5rem 1rem;
+            background: #f85149;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: #da3633;
+        }
+
+        .accounts {
+            width: 100%;
+            max-width: 800px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .account {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .account:last-child {
+            border-bottom: none;
+        }
+
+        .account-details {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .account-action {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            background: #238636;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #2ea043;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-title">Minhas Contas AWS</div>
+        <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="accounts" id="accountsList">
+        <!-- Aqui vão as contas registradas -->
+        <div class="account">
+            <div class="account-details">
+                <strong>Conta AWS 1</strong>
+                <span>ID: 123456789012</span>
+                <span>Região: us-east-1</span>
+            </div>
+            <div class="account-action">
+                <button class="btn" onclick="accessAccount()">Acessar</button>
+                <button class="btn">Remover</button>
+            </div>
+        </div>
+        <!-- Mais contas poderiam ser listadas aqui -->
+    </div>
+
+    <button class="btn" onclick="addAccount()">Adicionar Nova Conta</button>
+
+    <script>
+        function logout() {
+            localStorage.removeItem("awsnoc_token");
+            localStorage.removeItem("awsnoc_user");
+            window.location.href = "/";
+        }
+
+        function accessAccount() {
+            window.location.href = "/account-details.html?account=1";
+        }
+
+        function addAccount() {
+            // Função de exemplo para adicionar uma nova conta
+            alert("Adicionar nova conta");
+        }
+
+        window.onload = function() {
+            const token = localStorage.getItem("awsnoc_token");
+            if (!token) {
+                window.location.href = "/login.html";
+            }
+        }
+    </script>
+</body>
+</html>

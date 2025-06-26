@@ -16,6 +16,11 @@ from pydantic import BaseModel
 from typing import List, Optional
 import uvicorn
 from datetime import datetime
+import hashlib
+import secrets
+from datetime import timedelta
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 # Configuração do banco
 DB_CONFIG = {
@@ -40,6 +45,54 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Configuração de Segurança
+security = HTTPBearer(auto_error=False)
+
+def hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def generate_session_token() -> str:
+    return secrets.token_urlsafe(32)
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    if not credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token não fornecido"
+        )
+    
+    token = credentials.credentials
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        cur.execute("""
+            SELECT u.id, u.email, u.full_name, u.role 
+            FROM users u 
+            JOIN user_sessions s ON u.id = s.user_id 
+            WHERE s.session_token = %s 
+            AND s.is_active = TRUE 
+            AND s.expires_at > NOW()
+        """, (token,))
+        
+        user = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token inválido ou expirado"
+            )
+        
+        return dict(user)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Erro na autenticação"
+        )
+
+
 # Modelos Pydantic
 class AWSAccount(BaseModel):
     id: Optional[int] = None
@@ -49,6 +102,29 @@ class AWSAccount(BaseModel):
     access_key: str
     secret_key: str
     services: List[str] = []
+
+# Modelos de Autenticação
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class UserRegister(BaseModel):
+    email: str
+    password: str
+    full_name: str
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    full_name: str
+    role: str
+
+class LoginResponse(BaseModel):
+    success: bool
+    message: str
+    user: Optional[UserResponse] = None
+    token: Optional[str] = None
+
     status: str = "active"
 
 def get_db_connection():
@@ -81,6 +157,115 @@ async def root():
         "status": "running",
         "version": "1.0.0"
     }
+
+
+# Endpoints de Autenticação
+@app.post("/api/auth/login", response_model=LoginResponse)
+async def login(user_data: UserLogin):
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        password_hash = hash_password(user_data.password)
+        cur.execute("""
+            SELECT id, email, full_name, role 
+            FROM users 
+            WHERE email = %s AND password_hash = %s AND is_active = TRUE
+        """, (user_data.email, password_hash))
+        
+        user = cur.fetchone()
+        
+        if not user:
+            return LoginResponse(success=False, message="Email ou senha incorretos")
+        
+        # Gerar token
+        token = generate_session_token()
+        expires_at = datetime.now() + timedelta(days=7)
+        
+        cur.execute("""
+            INSERT INTO user_sessions (user_id, session_token, expires_at)
+            VALUES (%s, %s, %s)
+        """, (user['id'], token, expires_at))
+        
+        cur.execute("UPDATE users SET last_login = NOW() WHERE id = %s", (user['id'],))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return LoginResponse(
+            success=True,
+            message="Login realizado com sucesso",
+            user=UserResponse(**dict(user)),
+            token=token
+        )
+        
+    except Exception as e:
+        return LoginResponse(success=False, message=f"Erro: {str(e)}")
+
+@app.post("/api/auth/register", response_model=LoginResponse)
+async def register(user_data: UserRegister):
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        
+        # Verificar se email já existe
+        cur.execute("SELECT id FROM users WHERE email = %s", (user_data.email,))
+        if cur.fetchone():
+            return LoginResponse(success=False, message="Email já está em uso")
+        
+        # Criar usuário
+        password_hash = hash_password(user_data.password)
+        cur.execute("""
+            INSERT INTO users (email, password_hash, full_name, role)
+            VALUES (%s, %s, %s, 'user')
+            RETURNING id, email, full_name, role
+        """, (user_data.email, password_hash, user_data.full_name))
+        
+        new_user = cur.fetchone()
+        
+        # Gerar token
+        token = generate_session_token()
+        expires_at = datetime.now() + timedelta(days=7)
+        
+        cur.execute("""
+            INSERT INTO user_sessions (user_id, session_token, expires_at)
+            VALUES (%s, %s, %s)
+        """, (new_user['id'], token, expires_at))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return LoginResponse(
+            success=True,
+            message="Usuário criado com sucesso",
+            user=UserResponse(**dict(new_user)),
+            token=token
+        )
+        
+    except Exception as e:
+        return LoginResponse(success=False, message=f"Erro: {str(e)}")
+
+@app.get("/api/auth/me")
+async def get_current_user(current_user: dict = Depends(verify_token)):
+    return {"success": True, "user": current_user}
+
+@app.post("/api/auth/logout")
+async def logout(current_user: dict = Depends(verify_token)):
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cur = conn.cursor()
+        
+        cur.execute("UPDATE user_sessions SET is_active = FALSE WHERE user_id = %s", (current_user['id'],))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return {"success": True, "message": "Logout realizado com sucesso"}
+    except Exception as e:
+        return {"success": False, "message": f"Erro: {str(e)}"}
 
 @app.get("/health")
 async def health():

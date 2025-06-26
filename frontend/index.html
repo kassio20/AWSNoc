@@ -3,46 +3,479 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AWS-NOC - AWS Monitoring Platform</title>
-    <script>
-        window.location.href = '/accounts.html';
-    </script>
+    <title>AWS NOC - Monitoramento Inteligente de AWS</title>
     <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0d1117;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
             color: #e6edf3; 
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #30363d;
+            z-index: 1000;
+            padding: 1rem 2rem;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #58a6ff;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #58a6ff, #1f6feb);
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0;
+            font-weight: bold;
+            color: white;
+            font-size: 18px;
         }
-        .loading {
-            text-align: center;
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2ea043, #238636);
+            color: white;
+            border: 1px solid #2ea043;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #238636, #2ea043);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(46, 160, 67, 0.4);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 2rem;
         }
-        .spinner {
-            border: 3px solid #30363d;
-            border-top: 3px solid #58a6ff;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
+
+        .hero-section {
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #e6edf3 0%, #58a6ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-content .subtitle {
+            font-size: 1.25rem;
+            color: #8b949e;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .features {
+            margin-bottom: 2rem;
+            background: rgba(33, 38, 45, 0.8);
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.2rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            background: #2ea043;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(46, 160, 67, 0.3);
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-cta {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-get-started {
+            background: linear-gradient(135deg, #2ea043, #238636);
+            color: white;
+        }
+
+        .btn-get-started:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(46, 160, 67, 0.4);
+        }
+
+        /* Dashboard Preview */
+        .dashboard-preview {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #21262d 0%, #30363d 100%);
+            border: 1px solid #30363d;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            margin-top: 9rem;
+        }
+
+        .preview-header {
+            background: #161b22;
+            padding: 1rem;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .preview-dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #f85149; }
+        .dot.yellow { background: #d29922; }
+        .dot.green { background: #2ea043; }
+
+        .preview-content {
+            padding: 2rem;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Alert visualization */
+        .alert-widget {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: linear-gradient(135deg, #da3633, #f85149);
+            padding: 1rem;
+            border-radius: 12px;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            min-width: 200px;
+            box-shadow: 0 8px 25px rgba(248, 81, 73, 0.3);
+        }
+
+        .alert-icon {
+            display: inline-block;
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        /* Metrics grid */
+        .metrics-grid {
+            position: absolute;
+            bottom: 2rem;
+            left: 1rem;
+            right: 1rem;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .metric-cell {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .metric-cell.high { background: linear-gradient(135deg, #f85149, #da3633); }
+        .metric-cell.medium { background: linear-gradient(135deg, #fd7e14, #d29922); }
+        .metric-cell.low { background: linear-gradient(135deg, #2ea043, #238636); }
+        .metric-cell.normal { background: linear-gradient(135deg, #58a6ff, #1f6feb); }
+
+        /* Animation */
+        .metric-cell {
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        /* Progress bars */
+        .progress-section {
+            position: absolute;
+            top: 5rem;
+            right: 1rem;
+            width: 200px;
+        }
+
+        .progress-item {
+            margin-bottom: 1rem;
+        }
+
+        .progress-label {
+            font-size: 0.8rem;
+            color: #8b949e;
+            margin-bottom: 0.25rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #21262d;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 2s ease;
+        }
+
+        .progress-fill.cpu { 
+            background: linear-gradient(90deg, #58a6ff, #1f6feb);
+            width: 75%;
+        }
+
+        .progress-fill.memory { 
+            background: linear-gradient(90deg, #2ea043, #238636);
+            width: 60%;
+        }
+
+        .progress-fill.disk { 
+            background: linear-gradient(90deg, #fd7e14, #d29922);
+            width: 45%;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-section {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                text-align: center;
+            }
+
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .dashboard-preview {
+                order: -1;
+            }
+
+            .preview-content {
+                height: 250px;
+            }
+
+            .cta-buttons {
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="loading">
-        <div class="spinner"></div>
-        <h1>🚀 AWS-NOC</h1>
-        <p>AWS Monitoring Platform</p>
-        <p>Redirecionando...</p>
-    </div>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">A</div>
+                AWS NOC
+            </div>
+            <div class="auth-buttons">
+                <a href="/login.html" class="btn btn-primary">Entrar</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="hero-section">
+            <div class="hero-content">
+                <h1>Plataforma Inteligente para Analise de Incidentes em Ambientes AWS</h1>
+                <p class="subtitle">Gerenciamento e monitoramento de ambientes AWS com análise automática via IA</p>
+                
+                <div class="features">
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <span>Monitoramento em tempo real de EC2, ECS, RDS e Load Balancers</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <span>Análise automática com Amazon Bedrock (Claude-3)</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <span>Alertas proativos e recomendações inteligentes</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <span>Dashboard centralizado para múltiplas contas AWS</span>
+                    </div>
+                </div>
+
+                <div class="cta-buttons">
+                    <a href="/login.html" class="btn-cta btn-get-started">Começar Agora</a>
+                </div>
+            </div>
+
+            <div class="dashboard-preview">
+                <div class="preview-header">
+                    <div class="preview-dots">
+                        <div class="dot red"></div>
+                        <div class="dot yellow"></div>
+                        <div class="dot green"></div>
+                    </div>
+                </div>
+                <div class="preview-content">
+                    <div class="alert-widget">
+                        <span class="alert-icon">⚠️</span>
+                        High CPU Usage Detected
+                    </div>
+                    
+                    <div class="progress-section">
+                        <div class="progress-item">
+                            <div class="progress-label">CPU Usage</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill cpu"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label">Memory</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill memory"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label">Disk</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill disk"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metrics-grid">
+                        <div class="metric-cell high"></div>
+                        <div class="metric-cell high"></div>
+                        <div class="metric-cell medium"></div>
+                        <div class="metric-cell low"></div>
+                        <div class="metric-cell low"></div>
+                        <div class="metric-cell low"></div>
+                        <div class="metric-cell normal"></div>
+                        <div class="metric-cell normal"></div>
+                        <div class="metric-cell normal"></div>
+                        <div class="metric-cell low"></div>
+                        <div class="metric-cell low"></div>
+                        <div class="metric-cell low"></div>
+                        <div class="metric-cell low"></div>
+                        <div class="metric-cell low"></div>
+                        <div class="metric-cell medium"></div>
+                        <div class="metric-cell medium"></div>
+                        <div class="metric-cell high"></div>
+                        <div class="metric-cell high"></div>
+                        <div class="metric-cell high"></div>
+                        <div class="metric-cell normal"></div>
+                        <div class="metric-cell normal"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Verificar se já está logado
+        const token = localStorage.getItem("awsnoc_token");
+        if (token) {
+            window.location.href = "/my-accounts.html";
+        }
+
+        // Add some animation to metrics
+        setInterval(() => {
+            const cells = document.querySelectorAll(".metric-cell");
+            cells.forEach(cell => {
+                const classes = ["high", "medium", "low", "normal"];
+                const randomClass = classes[Math.floor(Math.random() * classes.length)];
+                cell.className = `metric-cell ${randomClass}`;
+            });
+        }, 3000);
+    </script>
 </body>
 </html>
